@@ -28,18 +28,30 @@ def get_function(block,is_train):
     return getattr(block,s)
 
 #feature_enginnering run
-def to_feature(input_df,remain_df,blocks,is_train=False):
+def to_feature(input_df,remain_df,blocks):
     out_df = remain_df
     
     for block in tqdm(blocks,total=len(blocks)):
-        func = get_function(block,is_train)
+        func = get_function(block,True)
         _df = func(input_df)
-       
         assert len(_df) == len(input_df),func._name_
-        
         out_df = pd.concat([out_df,_df],axis=1)
     return out_df    
     
+def to_feature_transform(input_df_train,remain_df_train,input_df_test,remain_df_test,blocks):
+    out_df_train = remain_df_train
+    out_df_test = remain_df_test
+    
+    for block in tqdm(blocks,total=len(blocks)):
+        func = get_function(block,True)
+        _df_train = func(input_df_train)
+        assert len(_df_train) == len(input_df_train),func._name_
+        func = get_function(block,False)
+        _df_test = func(input_df_test)
+        assert len(_df_test) == len(input_df_test),func._name_
+        out_df_train = pd.concat([out_df_train,_df_train],axis=1)
+        out_df_test = pd.concat([out_df_test,_df_test],axis=1)
+    return out_df _train,out_df_test  
     
  #----basic feature engineering---#
 
@@ -161,6 +173,9 @@ class CombinationBlock(BaseBlock):
         self.col1 = col1
         self.col2 = col2
 
+    def fit(self,input_df):
+        return self.transform(input_df)
+    
     def transform(self,input_df):
         remain_df = input_df.copy()
         remain_df[self.col1 + 'and' + self.col2] = input_df[self.col1].astype('str') + input_df[self.col2].astype('str')
@@ -173,6 +188,9 @@ class BinningBlock(BaseBlock):
         self.lag = lag
         self.col = col
         self.edges = edges
+        
+    def fit(self,input_df):
+        return self.transform(input_df)
 
     def transform(self,input_df):
         remain_df = input_df.copy()
@@ -186,6 +204,9 @@ class LagBlock(BaseBlock):
         self.lag = lag
         self.ids = ids
         self.cols = cols
+        
+    def fit(self,input_df):
+        return self.transform(input_df)
 
     def transform(self,input_df):
         output_df = input_df.groupby(self.ids)[self.cols].lag(self.lag)
@@ -199,6 +220,9 @@ class Lag_DiffBlock(BaseBlock):
         self.lag = lag
         self.ids = ids
         self.cols = cols
+        
+    def fit(self,input_df):
+        return self.transform(input_df)
 
     def transform(self,input_df):
         output_df = input_df.groupby(self.ids)[self.cols].diff(self.lag)
