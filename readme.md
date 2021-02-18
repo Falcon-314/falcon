@@ -13,6 +13,6 @@ repository instruction
 9.sound,optimization(future)  
   
 #usage  
-!git clone https://github.com/Falcon-314/mlcode.git  
+!git clone https://github.com/Falcon-314/falcon.git  
 package_path = '/content/mlcode/function'  
 sys.path.append(package_path)  
