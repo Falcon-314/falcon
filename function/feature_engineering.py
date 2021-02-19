@@ -38,7 +38,7 @@ def to_feature(input_df,remain_df,blocks):
         out_df = pd.concat([out_df,_df],axis=1)
     return out_df    
     
-def to_feature_transform(input_df_train,remain_df_train,input_df_test,remain_df_test,blocks):
+def to_feature_all(input_df_train,remain_df_train,input_df_test,remain_df_test,blocks):
     out_df_train = remain_df_train
     out_df_test = remain_df_test
     
