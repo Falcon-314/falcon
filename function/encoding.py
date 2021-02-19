@@ -31,24 +31,32 @@ class LabelBlock(BaseBlock):
     def transform(self,input_df):
         return self.le.transform(input_df[col])
 
-
-def label_encoding(df,label_cols):
-    
-    return df 
-
 #One-Hot Encoding
 from sklearn.preprocessing import OneHotEncoder
-def Onehot_encoding(df, one_cols):
-    ohe = OneHotEncoder(sparse = False,categories = 'auto')
-    ohe.fit(df[one_cols])
-    columns = []
-    for i,c in enumerate(one_cols):
-        columns += [f'{c}_{v}' for v in ohe.categories_[i]]
-
-    dummy_data = pd.DataFrame(ohe.transform(df[one_cols]),columns = columns)
-    df = pd.concat([df.drop(one_cols,axis = 1),dummy_data],axis = 1)
-    return df
-  
+class OneHotBlock(BaseBlock):
+    
+    def __init__(self,key:str,col):
+        self.key =key
+        self.meta_df =None
+        self.cols = cols
+        self.meta_df =None
+        self.ohe = OneHotEncoder(sparse = False,categories = 'auto')
+        
+    def fit(self,input_df):
+        self.ohe.fit(input_df[col])
+        columns = []
+        for i,c in enumerate(one_cols):
+            columns += [f'{c}_{v}' for v in ohe.categories_[i]]
+            dummy_data = pd.DataFrame(ohe.transform(df[one_cols]),columns = columns)
+            df = pd.concat([df.drop(one_cols,axis = 1),dummy_data],axis = 1)
+        self.meta_df = df
+        return self.transform(input_df[col])
+    
+    def transform(self,input_df):
+        out_df = pd.merge(input_df[self.key],self.meta_df,on=self.key,how='left').drop(columns=[self.key])
+        out_df = out_df.add_prefix('Std_')
+        return self.le.transform(input_df[col])
+    
 #Frequency Encoding
 def freq_encoding(df, freq_cols):
     for c in freq_cols:
