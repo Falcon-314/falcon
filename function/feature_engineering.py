@@ -55,6 +55,66 @@ def to_feature_transform(input_df_train,remain_df_train,input_df_test,remain_df_
     
  #----basic feature engineering---#
 
+#plus
+class PlusBlock(BaseBlock):
+    
+    def __init__(self,col1,col2):
+        self.col1 = col1
+        self.col2 = col2
+        
+    def fit(self,input_df):
+        return self.transform(input_df)
+
+    def transform(self,input_df):
+        remain_df = input_df.copy()
+        remain_df[self.col1 + '_plus_' + self.col2] = input_df[self.col1] + input_df[self.col2]
+        return remain_df[self.col1 + '_plus_' + self.col2]
+
+#minus
+class MinusBlock(BaseBlock):
+    
+    def __init__(self,col1,col2):
+        self.col1 = col1
+        self.col2 = col2
+        
+    def fit(self,input_df):
+        return self.transform(input_df)
+
+    def transform(self,input_df):
+        remain_df = input_df.copy()
+        remain_df[self.col1 + '_minus_' + self.col2] = input_df[self.col1] - input_df[self.col2]
+        return remain_df[self.col1 + '_minus_' + self.col2]
+    
+#multiple
+class MultipleBlock(BaseBlock):
+    
+    def __init__(self,col1,col2):
+        self.col1 = col1
+        self.col2 = col2
+        
+    def fit(self,input_df):
+        return self.transform(input_df)
+
+    def transform(self,input_df):
+        remain_df = input_df.copy()
+        remain_df[self.col1 + '_mulpiple_' + self.col2] = input_df[self.col1] * input_df[self.col2]
+        return remain_df[self.col1 + '_multiple_' + self.col2]
+
+#devide
+class DevideBlock(BaseBlock):
+    
+    def __init__(self,col1,col2):
+        self.col1 = col1
+        self.col2 = col2
+        
+    def fit(self,input_df):
+        return self.transform(input_df)
+
+    def transform(self,input_df):
+        remain_df = input_df.copy()
+        remain_df[self.col1 + '_devide_' + self.col2] = input_df[self.col1] / input_df[self.col2]
+        return remain_df[self.col1 + '_devide_' + self.col2]    
+    
 #Aggregation_mean
 class MeanBlock(BaseBlock):
     
@@ -90,6 +150,43 @@ class StdBlock(BaseBlock):
         out_df = pd.merge(input_df[self.key],self.meta_df,on=self.key,how='left').drop(columns=[self.key])
         out_df = out_df.add_prefix('Std_')
         return out_df
+    
+#Aggregation_skew
+class SkewBlock(BaseBlock):
+    
+    def __init__(self,key:str,cols):
+        self.key =key
+        self.meta_df =None
+        self.cols = cols
+        
+    def fit(self,input_df):
+        _df = input_df[self.cols].groupby(input_df[self.key]).skew()
+        self.meta_df = _df
+        return self.transform(input_df)
+    
+    def transform(self,input_df):
+        out_df = pd.merge(input_df[self.key],self.meta_df,on=self.key,how='left').drop(columns=[self.key])
+        out_df = out_df.add_prefix('Std_')
+        return out_df
+    
+#ratio
+class RatioBlock(BaseBlock):
+    
+    def __init__(self,key:str,cols):
+        self.key =key
+        self.meta_df =None
+        self.cols = cols
+        
+    def fit(self,input_df):
+        _df_max = input_df[self.cols].groupby(input_df[self.key]).max()
+        _df_min = input_df[self.cols].groupby(input_df[self.key]).min()
+        self.meta_df = _df
+        return self.transform(input_df)
+    
+    def transform(self,input_df):
+        out_df = pd.merge(input_df[self.key],self.meta_df,on=self.key,how='left').drop(columns=[self.key])
+        out_df = out_df.add_prefix('Range_')
+        return out_df  
     
 #Aggregation_sum
 class SumBlock(BaseBlock):
@@ -146,8 +243,65 @@ class MinBlock(BaseBlock):
         out_df = out_df.add_prefix('Max_')
         return out_df    
     
+#Aggregation_range
+class RangeBlock(BaseBlock):
+    
+    def __init__(self,key:str,cols):
+        self.key =key
+        self.meta_df =None
+        self.cols = cols
+        
+    def fit(self,input_df):
+        _df_max = input_df[self.cols].groupby(input_df[self.key]).max()
+        _df_min = input_df[self.cols].groupby(input_df[self.key]).min()
+        self.meta_df = _df
+        return self.transform(input_df)
+    
+    def transform(self,input_df):
+        out_df = pd.merge(input_df[self.key],self.meta_df,on=self.key,how='left').drop(columns=[self.key])
+        out_df = out_df.add_prefix('Range_')
+        return out_df  
+    
+#Aggregation_quantile
+class Agg_QuantileBlock(BaseBlock):
+    
+    def __init__(self,key:str,cols):
+        self.key =key
+        self.meta_df =None
+        self.cols = cols
+        
+    def fit(self,input_df):
+        _df_max = input_df[self.cols].groupby(input_df[self.key]).max()
+        _df_min = input_df[self.cols].groupby(input_df[self.key]).min()
+        self.meta_df = _df
+        return self.transform(input_df)
+    
+    def transform(self,input_df):
+        out_df = pd.merge(input_df[self.key],self.meta_df,on=self.key,how='left').drop(columns=[self.key])
+        out_df = out_df.add_prefix('Agg_Range_')
+        return out_df  
+    
+#quantilerange
+class Agg_QuantileRange_Block(BaseBlock):
+    
+    def __init__(self,key:str,cols):
+        self.key =key
+        self.meta_df =None
+        self.cols = cols
+        
+    def fit(self,input_df):
+        _df_max = input_df[self.cols].groupby(input_df[self.key]).max()
+        _df_min = input_df[self.cols].groupby(input_df[self.key]).min()
+        self.meta_df = _df
+        return self.transform(input_df)
+    
+    def transform(self,input_df):
+        out_df = pd.merge(input_df[self.key],self.meta_df,on=self.key,how='left').drop(columns=[self.key])
+        out_df = out_df.add_prefix('Range_')
+        return out_df  
+    
 #Aggregation_count
-class CountBlock(BaseBlock):
+class Agg_Count_Block(BaseBlock):
     
     def __init__(self,key:str,cols):
         self.key =key
@@ -162,7 +316,7 @@ class CountBlock(BaseBlock):
     
     def transform(self,input_df):
         out_df = pd.merge(input_df[self.key],self.meta_df,on=self.key,how='left').drop(columns=[self.key])
-        out_df = out_df.add_prefix('Count_')
+        out_df = out_df.add_prefix('Agg_Count_')
         return out_df    
     
 #conmination categorical feature
@@ -227,3 +381,41 @@ class Lag_DiffBlock(BaseBlock):
     def transform(self,input_df):
         output_df = input_df.groupby(self.ids)[self.cols].diff(self.lag)
         return output_df.add_prefix('Lag_{}_'.format(self.lag))
+
+#flag
+class FlagBlock(BaseBlock):
+    
+    def __init__(self,key:str,cols):
+        self.key =key
+        self.meta_df =None
+        self.cols = cols
+        
+    def fit(self,input_df):
+        _df_max = input_df[self.cols].groupby(input_df[self.key]).max()
+        _df_min = input_df[self.cols].groupby(input_df[self.key]).min()
+        self.meta_df = _df
+        return self.transform(input_df)
+    
+    def transform(self,input_df):
+        out_df = pd.merge(input_df[self.key],self.meta_df,on=self.key,how='left').drop(columns=[self.key])
+        out_df = out_df.add_prefix('Range_')
+        return out_df  
+    
+#flag_cunt
+class Flag_count_Block(BaseBlock):
+    
+    def __init__(self,key:str,cols):
+        self.key =key
+        self.meta_df =None
+        self.cols = cols
+        
+    def fit(self,input_df):
+        _df_max = input_df[self.cols].groupby(input_df[self.key]).max()
+        _df_min = input_df[self.cols].groupby(input_df[self.key]).min()
+        self.meta_df = _df
+        return self.transform(input_df)
+    
+    def transform(self,input_df):
+        out_df = pd.merge(input_df[self.key],self.meta_df,on=self.key,how='left').drop(columns=[self.key])
+        out_df = out_df.add_prefix('Range_')
+        return out_df  
