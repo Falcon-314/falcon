@@ -1,7 +1,9 @@
-#module setting
+#---module setting---#
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
+
+#---Base function---#
 
 #BaseBlock
 class BaseBlock(object):
@@ -19,7 +21,7 @@ class WrapperBlock(BaseBlock):
     def transform(self,input_df):
         return self.function(input_df)
 
-#fit or transform
+#select fit or transform
 def get_function(block,is_train):
     s = mapping ={
         True:'fit',
@@ -55,67 +57,36 @@ def to_feature_transform(input_df_train,remain_df_train,input_df_test,remain_df_
     
 #----basic feature engineering---#
 
-#plus
-class PlusBlock(BaseBlock):
+#calculate
+class CalcBlock(BaseBlock):
     
-    def __init__(self,col1,col2):
+    def __init__(self,col1,col2,mode):
         self.col1 = col1
         self.col2 = col2
+        self.mode = mode
         
     def fit(self,input_df):
         return self.transform(input_df)
 
     def transform(self,input_df):
         remain_df = input_df.copy()
-        remain_df[self.col1 + '_plus_' + self.col2] = input_df[self.col1] + input_df[self.col2]
-        return remain_df[self.col1 + '_plus_' + self.col2]
-
-#minus
-class MinusBlock(BaseBlock):
+        if mode = 'plus':
+            remain_df[self.col1 + '_plus_' + self.col2] = input_df[self.col1] + input_df[self.col2]
+            return_df = remain_df[self.col1 + '_plus_' + self.col2]
+        if mode = 'minus':
+            remain_df[self.col1 + '_minus_' + self.col2] = input_df[self.col1] - input_df[self.col2]
+            return_df = remain_df[self.col1 + '_minus_' + self.col2]
+        if mode = 'multiple':
+            remain_df[self.col1 + '_multiple_' + self.col2] = input_df[self.col1] * input_df[self.col2]
+            return_df = remain_df[self.col1 + '_multiple_' + self.col2]
+        if mode = 'devide':
+            remain_df[self.col1 + '_devide_' + self.col2] = input_df[self.col1] / input_df[self.col2]
+            return_df = remain_df[self.col1 + '_devide_' + self.col2]
+        return return_df
     
-    def __init__(self,col1,col2):
-        self.col1 = col1
-        self.col2 = col2
-        
-    def fit(self,input_df):
-        return self.transform(input_df)
+#Aggregation
 
-    def transform(self,input_df):
-        remain_df = input_df.copy()
-        remain_df[self.col1 + '_minus_' + self.col2] = input_df[self.col1] - input_df[self.col2]
-        return remain_df[self.col1 + '_minus_' + self.col2]
-    
-#multiple
-class MultipleBlock(BaseBlock):
-    
-    def __init__(self,col1,col2):
-        self.col1 = col1
-        self.col2 = col2
-        
-    def fit(self,input_df):
-        return self.transform(input_df)
 
-    def transform(self,input_df):
-        remain_df = input_df.copy()
-        remain_df[self.col1 + '_mulpiple_' + self.col2] = input_df[self.col1] * input_df[self.col2]
-        return remain_df[self.col1 + '_multiple_' + self.col2]
-
-#devide
-class DevideBlock(BaseBlock):
-    
-    def __init__(self,col1,col2):
-        self.col1 = col1
-        self.col2 = col2
-        
-    def fit(self,input_df):
-        return self.transform(input_df)
-
-    def transform(self,input_df):
-        remain_df = input_df.copy()
-        remain_df[self.col1 + '_devide_' + self.col2] = input_df[self.col1] / input_df[self.col2]
-        return remain_df[self.col1 + '_devide_' + self.col2]    
-    
-#Aggregation_mean
 class MeanBlock(BaseBlock):
     
     def __init__(self,key:str,cols):
@@ -350,39 +321,9 @@ class BinningBlock(BaseBlock):
         remain_df = input_df.copy()
         remain_df[col + '_bin'] = pd.cut(input_df[self.col], edges, labels = False)
         return remain_df[col + '_bin']
-    
-#Lag feature
-class LagBlock(BaseBlock):
-    
-    def __init__(self,lag:int,ids,cols):
-        self.lag = lag
-        self.ids = ids
-        self.cols = cols
-        
-    def fit(self,input_df):
-        return self.transform(input_df)
-
-    def transform(self,input_df):
-        output_df = input_df.groupby(self.ids)[self.cols].lag(self.lag)
-        return output_df.add_prefix('Lag_{}_'.format(self.lag))
-    
-    
-#Lag feature (diff)
-class Lag_DiffBlock(BaseBlock):
-    
-    def __init__(self,lag:int,ids,cols):
-        self.lag = lag
-        self.ids = ids
-        self.cols = cols
-        
-    def fit(self,input_df):
-        return self.transform(input_df)
-
-    def transform(self,input_df):
-        output_df = input_df.groupby(self.ids)[self.cols].diff(self.lag)
-        return output_df.add_prefix('Lag_{}_'.format(self.lag))
-
-#flag
+   
+#---count feature---#
+#Flag
 class FlagBlock(BaseBlock):
     
     def __init__(self,key:str,cols):
@@ -419,3 +360,45 @@ class Flag_count_Block(BaseBlock):
         out_df = pd.merge(input_df[self.key],self.meta_df,on=self.key,how='left').drop(columns=[self.key])
         out_df = out_df.add_prefix('Range_')
         return out_df  
+
+#n_distinct : number of unique
+
+#Entropy : apply entropy on frequency table
+
+#freq1name : the number of most frequently appeared category
+
+#freq1ratio : the number of most frequently appeared category / group size
+
+
+#---time series feature---#
+#Lag feature
+class LagBlock(BaseBlock):
+    
+    def __init__(self,lag:int,ids,cols):
+        self.lag = lag
+        self.ids = ids
+        self.cols = cols
+        
+    def fit(self,input_df):
+        return self.transform(input_df)
+
+    def transform(self,input_df):
+        output_df = input_df.groupby(self.ids)[self.cols].lag(self.lag)
+        return output_df.add_prefix('Lag_{}_'.format(self.lag))
+    
+    
+#Lag feature (diff)
+class Lag_DiffBlock(BaseBlock):
+    
+    def __init__(self,lag:int,ids,cols):
+        self.lag = lag
+        self.ids = ids
+        self.cols = cols
+        
+    def fit(self,input_df):
+        return self.transform(input_df)
+
+    def transform(self,input_df):
+        output_df = input_df.groupby(self.ids)[self.cols].diff(self.lag)
+        return output_df.add_prefix('Lag_{}_'.format(self.lag))
+
