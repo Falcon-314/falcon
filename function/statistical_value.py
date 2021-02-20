@@ -15,7 +15,7 @@ def mean_diff(x):
     return x - x.mean()
 
 #平均と偏差の比
-def Mean variance(x):
+def Mean_variance(x):
     return x.std() / x.mean()
 
 #Z score
