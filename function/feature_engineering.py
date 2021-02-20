@@ -70,16 +70,16 @@ class CalcBlock(BaseBlock):
 
     def transform(self,input_df):
         remain_df = input_df.copy()
-        if mode = 'plus':
+        if mode == 'plus':
             remain_df[self.col1 + '_plus_' + self.col2] = input_df[self.col1] + input_df[self.col2]
             return_df = remain_df[self.col1 + '_plus_' + self.col2]
-        if mode = 'minus':
+        if mode == 'minus':
             remain_df[self.col1 + '_minus_' + self.col2] = input_df[self.col1] - input_df[self.col2]
             return_df = remain_df[self.col1 + '_minus_' + self.col2]
-        if mode = 'multiple':
+        if mode == 'multiple':
             remain_df[self.col1 + '_multiple_' + self.col2] = input_df[self.col1] * input_df[self.col2]
             return_df = remain_df[self.col1 + '_multiple_' + self.col2]
-        if mode = 'devide':
+        if mode == 'devide':
             remain_df[self.col1 + '_devide_' + self.col2] = input_df[self.col1] / input_df[self.col2]
             return_df = remain_df[self.col1 + '_devide_' + self.col2]
         return return_df
