@@ -5,9 +5,11 @@ import random
 import math
 import time
 
+import pandas as pd
 import numpy as np
 import tensorflow as tf
 
+from tqdm import tqdm
 from contextlib import contextmanager
 
 #---logging---#
@@ -100,6 +102,22 @@ def reduce_mem_usage(df, verbose=True):
     return df
 
 #---preprocess---#
+#BaseBlock
+class BaseBlock(object):
+    def fit(self,input_df,y=None):
+        return self.transform(input_df)
+    
+    def transform(self,input_df):
+        raise NotImplementedError()
+        
+#WrapperBlock
+class WrapperBlock(BaseBlock):
+    def __init__(self,function):
+        self.function=function
+    
+    def transform(self,input_df):
+        return self.function(input_df)
+
 #select fit or transform
 def get_function(block,is_train):
     s = mapping ={
