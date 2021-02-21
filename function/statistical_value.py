@@ -2,6 +2,14 @@
 def range_diff(x):
     return x.max() - x.min()
 
+# 平均値との差
+def diff(x):
+    return x - x.mean()
+
+#平均値との比
+def ratio(x):
+    return x / x.mean()
+
 # 最小値と最大値の比
 def range_ratio(x):
     return x.max() / x.min()
