@@ -1,59 +1,6 @@
 #---module setting---#
 import pandas as pd
 import numpy as np
-from tqdm import tqdm
-
-#---Base function---#
-
-#BaseBlock
-class BaseBlock(object):
-    def fit(self,input_df,y=None):
-        return self.transform(input_df)
-    
-    def transform(self,input_df):
-        raise NotImplementedError()
-        
-#WrapperBlock
-class WrapperBlock(BaseBlock):
-    def __init__(self,function):
-        self.function=function
-    
-    def transform(self,input_df):
-        return self.function(input_df)
-
-#select fit or transform
-def get_function(block,is_train):
-    s = mapping ={
-        True:'fit',
-        False:'transform'
-    }.get(is_train)
-    return getattr(block,s)
-
-#feature_enginnering run
-def to_feature(input_df,remain_df,blocks):
-    out_df = remain_df
-    
-    for block in tqdm(blocks,total=len(blocks)):
-        func = get_function(block,True)
-        _df = func(input_df)
-        assert len(_df) == len(input_df),func._name_
-        out_df = pd.concat([out_df,_df],axis=1)
-    return out_df    
-    
-def to_feature_transform(input_df_train,remain_df_train,input_df_test,remain_df_test,blocks):
-    out_df_train = remain_df_train
-    out_df_test = remain_df_test
-    
-    for block in tqdm(blocks,total=len(blocks)):
-        func = get_function(block,True)
-        _df_train = func(input_df_train)
-        assert len(_df_train) == len(input_df_train),func._name_
-        func = get_function(block,False)
-        _df_test = func(input_df_test)
-        assert len(_df_test) == len(input_df_test),func._name_
-        out_df_train = pd.concat([out_df_train,_df_train],axis=1)
-        out_df_test = pd.concat([out_df_test,_df_test],axis=1)
-    return out_df_train, out_df_test  
     
 #----basic feature engineering---#
 
