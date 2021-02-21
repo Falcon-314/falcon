@@ -315,6 +315,36 @@ class Flag_count_Block(BaseBlock):
 
 #freq1ratio : the number of most frequently appeared category / group size
 
+#---merge additional data---#
+class MergeBlock(BaseBlock):
+    def __init__(self,key:str,cols,agg_settings, add):
+        self.key = key
+        self.meta_df =None
+        self.columns_name = None
+        self.cols = cols
+        self.agg_settings =agg_settings
+        self.add = add
+
+    def fit(self,df):
+        #集計の実行
+        _add = self.add.groupby(self.key)[self.cols].agg(self.agg_settings).reset_index()
+
+        #列名の変更
+        _aggs = []
+        for agg in self.agg_settings:
+            if isinstance(agg, str):
+                _aggs.append(agg)
+            else:
+                _aggs.append(agg.__name__)
+        self.columns_name = [self.key] + ["_".join([c, agg]) for c in self.cols for agg in _aggs]
+        _add.columns = self.columns_name
+
+        self.meta_df = _add
+        return self.transform(df)
+    
+    def transform(self,df):
+        df = df.merge(self.meta_df, on=self.key, how='left')
+        return df[self.columns_name].drop(self.key, axis = 1)
 
 #---time series feature---#
 #Lag feature
