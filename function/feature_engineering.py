@@ -33,7 +33,6 @@ class CalcBlock(BaseBlock):
     
 #Aggregation
 
-
 class MeanBlock(BaseBlock):
     
     def __init__(self,key:str,cols):
