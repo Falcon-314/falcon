@@ -2,14 +2,6 @@
 def range_diff(x):
     return x.max() - x.min()
 
-# 平均値との差
-def diff(x):
-    return x - x.mean()
-
-#平均値との比
-def ratio(x):
-    return x / x.mean()
-
 # 最小値と最大値の比
 def range_ratio(x):
     return x.max() / x.min()
@@ -17,10 +9,6 @@ def range_ratio(x):
 #平均と偏差の比
 def mean_variance(x):
     return x.std() / x.mean()
-
-#z_score
-def z_score(x):
-    return (x - x.mean())/ x.std()
 
 # 第一四分位点
 def third_quartile(x):
