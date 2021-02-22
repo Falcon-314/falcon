@@ -67,7 +67,6 @@ class AggBlock(BaseBlock):
     
     def transform(self,input_df):
         output_df = input_df.merge(self.meta_df, on=self.key, how='left')
-        print('feature_name:',output_df[self.columns_name].columns)
         return output_df[self.columns_name].drop(self.key, axis = 1)
 
 class AggCalcBlock(BaseBlock):
