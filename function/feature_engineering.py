@@ -40,6 +40,57 @@ class CalcBlock(BaseBlock):
         return return_df
     
 #Aggregation
+class AggBlock(BaseBlock):
+    def __init__(self,key:str,cols,agg_settings):
+        self.key = key
+        self.meta_df =None
+        self.columns_name = None
+        self.cols = cols
+        self.agg_settings = agg_settings
+
+    def fit(self,input_df):
+        #集計の実行
+        _add = input_df[[self.key] + self.cols].groupby(self.key).agg(self.agg_settings).reset_index()
+
+        #列名の変更
+        _aggs = []
+        for agg in self.agg_settings:
+            if isinstance(agg, str):
+                _aggs.append(agg)
+            else:
+                _aggs.append(agg.__name__)
+        self.columns_name = [self.key] + ["_".join([c, agg, self.key]) for c in self.cols for agg in _aggs]
+        _add.columns = self.columns_name
+
+        self.meta_df = _add
+        return self.transform(input_df)
+    
+    def transform(self,input_df):
+        output_df = input_df.merge(self.meta_df, on=self.key, how='left')
+        print('feature_name:',output_df[self.columns_name].columns)
+        return output_df[self.columns_name].drop(self.key, axis = 1)
+
+class AggCalcBlock(BaseBlock):
+    def __init__(self,key:str,col,agg,mode):
+        self.key = key
+        self.columns_name = None
+        self.col = col
+        self.agg = agg
+        self.mode = mode
+
+    def fit(self,input_df):
+        return self.transform(input_df)
+    
+    def transform(self,input_df):
+        output_df = pd.DataFrame()
+        if self.mode == 'ratio':
+            output_df[self.col + '_ratio_' + f'{self.key}'] =  input_df[self.col] / input_df[self.col + f'_{self.agg}_' + f'{self.key}']
+            return_df = output_df[self.col + '_ratio_' + f'{self.key}']
+        if self.mode == 'diff':
+            output_df[self.col + '_diff_' + f'{self.key}'] =  input_df[self.col] - input_df[self.col + f'_{self.agg}_' + f'{self.key}']
+            return_df = output_df[self.col + '_diff_' + f'{self.key}']
+        return return_df    
+    
 
 #conmination categorical feature
 class CombinationBlock(BaseBlock):
