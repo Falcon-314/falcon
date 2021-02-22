@@ -18,6 +18,10 @@ def range_ratio(x):
 def mean_variance(x):
     return x.std() / x.mean()
 
+#z_score
+def z_score(x):
+    return (x - x.mean())/ x.std()
+
 # 第一四分位点
 def third_quartile(x):
     return x.quantile(0.75)
@@ -29,6 +33,8 @@ def first_quartile(x):
 #第一四分位点と第三四分位点の差
 def quartile_range(x):
     return x.quantile(0.75) - x.quantile(0.25)
+
+
 
 #平均値より大きい値の数と小さい値の数の比
     
