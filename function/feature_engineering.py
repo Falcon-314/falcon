@@ -1,7 +1,15 @@
 #---module setting---#
 import pandas as pd
 import numpy as np
+
+#BaseBlock
+class BaseBlock(object):
+    def fit(self,input_df,y=None):
+        return self.transform(input_df)
     
+    def transform(self,input_df):
+        raise NotImplementedError()
+
 #----basic feature engineering---#
 
 #calculate
