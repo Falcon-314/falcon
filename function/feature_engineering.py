@@ -41,8 +41,6 @@ class CalcBlock(BaseBlock):
     
 #Aggregation
 
-
-    
 #conmination categorical feature
 class CombinationBlock(BaseBlock):
     
