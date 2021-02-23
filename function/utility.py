@@ -153,14 +153,14 @@ def to_feature_transform(input_df_train,remain_df_train,input_df_test,remain_df_
     return out_df_train, out_df_test
 
 #preprocessed run #return:all columns
-def preprocess(input_df,blocks):   
+def to_preprocess(input_df,blocks):   
     _df = input_df.copy()
     for block in tqdm(blocks,total=len(blocks)):
         func = get_function(block,True)
         _df = func(_df)
     return _df    
     
-def preprocess_transform(input_df_train,input_df_test,blocks):
+def to_preprocess_transform(input_df_train,input_df_test,blocks):
     _df_train = input_df_train.copy()
     _df_test = input_df_test.copy()
     for block in tqdm(blocks,total=len(blocks)):
