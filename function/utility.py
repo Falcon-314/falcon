@@ -142,5 +142,4 @@ def run_preprocess(input_df,blocks,is_train=False):
     for block in tqdm(blocks,total=len(blocks)):
         func = get_function(block,is_train)
         out_df = func(input_df)
-        assert len(out_df) == len(input_df),func._name_
     return out_df 
