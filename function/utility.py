@@ -131,8 +131,8 @@ def run_createfe(input_df,blocks,is_train=False):
     out_df = input_df.copy()
     for block in tqdm(blocks,total=len(blocks)):
         func = get_function(block,is_train)
-        _df = func(input_df)
-        assert len(_df) == len(input_df),func._name_
+        _df = func(out_df)
+        assert len(_df) == len(out_df),func._name_
         out_df = pd.concat([out_df,_df],axis=1)
     return out_df
 
@@ -141,5 +141,5 @@ def run_preprocess(input_df,blocks,is_train=False):
     out_df = input_df.copy()
     for block in tqdm(blocks,total=len(blocks)):
         func = get_function(block,is_train)
-        out_df = func(input_df)
+        out_df = func(out_df)
     return out_df 
