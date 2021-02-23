@@ -20,16 +20,16 @@ class LabelBlock(BaseBlock):
     def __init__(self,key:str,col):
         self.key =key
         self.meta_df =None
-        self.cols = cols
+        self.col = col
         self.le = LabelEncoder()
         
     def fit(self,input_df):
-        input_df[col].fillna('missing',inplace = True)
-        self.le.fit(input_df[col])
-        return self.transform(input_df[col])
+        input_df[self.col].fillna('missing',inplace = True)
+        self.le.fit(input_df[self.col])
+        return self.transform(input_df)
     
     def transform(self,input_df):
-        return self.le.transform(input_df[col])
+        return pd.concat([input_df.drop(self.col,axis = 1),self.le.transform(input_df[self.col])],axis = 1)
 
 #One-Hot Encoding
 from sklearn.preprocessing import OneHotEncoder
@@ -43,26 +43,28 @@ class OneHotBlock(BaseBlock):
         self.ohe = OneHotEncoder(sparse = False,categories = 'auto')
         
     def fit(self,input_df):
-        self.ohe.fit(input_df[col])
-        columns = []
-        for i,c in enumerate(one_cols):
-            columns += [f'{c}_{v}' for v in ohe.categories_[i]]
-            dummy_data = pd.DataFrame(ohe.transform(df[one_cols]),columns = columns)
-            df = pd.concat([df.drop(one_cols,axis = 1),dummy_data],axis = 1)
-        self.meta_df = df
-        return self.transform(input_df[col])
+        self.ohe.fit(input_df[self.col])
+        self.columns = []
+        self.columns += [f'{self.col}_{v}' for v in self.ohe.categories[0]]
+        return self.transform(input_df)
     
     def transform(self,input_df):
-        out_df = pd.merge(input_df[self.key],self.meta_df,on=self.key,how='left').drop(columns=[self.key])
-        out_df = out_df.add_prefix('Std_')
-        return self.le.transform(input_df[col])
+        return pd.concat([input_df.drop(self.col,axis = 1),pd.DataFrame(self.le.transform(input_df[col]),columns = self.columns)],axis = 1)
     
 #Frequency Encoding
-def freq_encoding(df, freq_cols):
-    for c in freq_cols:
-        freq = df.query('part == "train"')[c].value_counts()
-        df[c] = df[c].map(freq)
-    return df
+class FreqBlock(BaseBlock):
+    
+    def __init__(self,key:str,col):
+        self.key =key
+        self.meta_df =None
+        self.col = col
+        
+    def fit(self,input_df):
+        self.meta_df = input_df[self.col].value_counts()
+        return self.transform(input_df)
+    
+    def transform(self,input_df): 
+        return input_df[self.col].map(self.meta_df)
 
 #Target encoding
 from sklearn.model_selection import KFold
