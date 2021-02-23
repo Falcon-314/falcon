@@ -127,45 +127,20 @@ def get_function(block,is_train):
     return getattr(block,s)
 
 #feature_enginnering run #return:only preprocessed columns
-def to_feature(input_df,remain_df,blocks):
-    out_df = remain_df
-    
+def run_createfe(input_df,blocks,is_train=False):
+    out_df = input_df.copy()
     for block in tqdm(blocks,total=len(blocks)):
-        func = get_function(block,True)
+        func = get_function(block,is_train)
         _df = func(input_df)
         assert len(_df) == len(input_df),func._name_
         out_df = pd.concat([out_df,_df],axis=1)
-    return out_df    
-    
-def to_feature_transform(input_df_train,remain_df_train,input_df_test,remain_df_test,blocks):
-    out_df_train = remain_df_train
-    out_df_test = remain_df_test
-    
-    for block in tqdm(blocks,total=len(blocks)):
-        func = get_function(block,True)
-        _df_train = func(input_df_train)
-        assert len(_df_train) == len(input_df_train),func._name_
-        func = get_function(block,False)
-        _df_test = func(input_df_test)
-        assert len(_df_test) == len(input_df_test),func._name_
-        out_df_train = pd.concat([out_df_train,_df_train],axis=1)
-        out_df_test = pd.concat([out_df_test,_df_test],axis=1)
-    return out_df_train, out_df_test
+    return out_df
 
 #preprocessed run #return:all columns
-def to_preprocess(input_df,blocks):   
-    _df = input_df.copy()
+def run_preprocess(input_df,blocks,is_train=False):
+    out_df = input_df.copy()
     for block in tqdm(blocks,total=len(blocks)):
-        func = get_function(block,True)
-        _df = func(_df)
-    return _df    
-    
-def to_preprocess_transform(input_df_train,input_df_test,blocks):
-    _df_train = input_df_train.copy()
-    _df_test = input_df_test.copy()
-    for block in tqdm(blocks,total=len(blocks)):
-        func = get_function(block,True)
-        _df_train = func(_df_train)
-        func = get_function(block,False)
-        _df_test = func(_df_test)
-    return _df_train, _df_test
+        func = get_function(block,is_train)
+        out_df = func(input_df)
+        assert len(_df) == len(input_df),func._name_
+    return out_df 
