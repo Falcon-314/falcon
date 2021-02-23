@@ -23,12 +23,15 @@ class LabelBlock(BaseBlock):
         self.le = LabelEncoder()
         
     def fit(self,input_df):
-        input_df[self.col].fillna('missing',inplace = True)
-        self.le.fit(input_df[self.col])
+        fit_df = input_df[self.col].fillna('missing',inplace = False)
+        self.le.fit(fit_df[self.col])
         return self.transform(input_df)
     
     def transform(self,input_df):
-        return pd.concat([input_df.drop(self.col,axis = 1),self.le.transform(input_df[self.col])],axis = 1)
+        transform_df = input_df[self.col].fillna('missing',inplace = False)
+        transform_df = self.le.transform(transform_df[self.col])
+        return_df = pd.concat([input_df.drop(self.col,axis = 1),transform_df],axis = 1)
+        return return_df
 
 #One-Hot Encoding
 from sklearn.preprocessing import OneHotEncoder
@@ -46,7 +49,8 @@ class OneHotBlock(BaseBlock):
         return self.transform(input_df)
     
     def transform(self,input_df):
-        return pd.concat([input_df.drop(self.col,axis = 1),pd.DataFrame(self.le.transform(input_df[col]),columns = self.columns)],axis = 1)
+        return_df = pd.concat([input_df.drop(self.col,axis = 1),pd.DataFrame(self.le.transform(input_df[col]),columns = self.columns)],axis = 1)
+        return return_df
     
 #Frequency Encoding
 class FreqBlock(BaseBlock):
