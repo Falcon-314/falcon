@@ -17,8 +17,7 @@ class BaseBlock(object):
 from sklearn.preprocessing import LabelEncoder
 class LabelBlock(BaseBlock):
     
-    def __init__(self,key:str,col):
-        self.key =key
+    def __init__(self,col):
         self.meta_df =None
         self.col = col
         self.le = LabelEncoder()
@@ -35,11 +34,9 @@ class LabelBlock(BaseBlock):
 from sklearn.preprocessing import OneHotEncoder
 class OneHotBlock(BaseBlock):
     
-    def __init__(self,key:str,col):
-        self.key =key
+    def __init__(self,col):
         self.meta_df =None
-        self.cols = cols
-        self.meta_df =None
+        self.col = col
         self.ohe = OneHotEncoder(sparse = False,categories = 'auto')
         
     def fit(self,input_df):
@@ -54,8 +51,7 @@ class OneHotBlock(BaseBlock):
 #Frequency Encoding
 class FreqBlock(BaseBlock):
     
-    def __init__(self,key:str,col):
-        self.key =key
+    def __init__(self,col):
         self.meta_df =None
         self.col = col
         
