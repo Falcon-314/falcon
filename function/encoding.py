@@ -23,14 +23,16 @@ class LabelBlock(BaseBlock):
         self.le = LabelEncoder()
         
     def fit(self,input_df):
-        fit_df = input_df[self.col].fillna('missing',inplace = False)
+        fit_df = input_df.copy()
+        fit_df[self.col].fillna('missing',inplace = True)
         self.le.fit(fit_df[self.col])
         return self.transform(input_df)
     
     def transform(self,input_df):
-        transform_df = input_df[self.col].fillna('missing',inplace = False)
-        transform_df = self.le.transform(transform_df[self.col])
-        return_df = pd.concat([input_df.drop(self.col,axis = 1),transform_df],axis = 1)
+        transform_df = input_df.copy()
+        transform_df[self.col].fillna('missing',inplace = True)
+        transform_df_enc = self.le.transform(transform_df[self.col])
+        return_df = pd.concat([input_df.drop(self.col,axis = 1),transform_df_enc],axis = 1)
         return return_df
 
 #One-Hot Encoding
