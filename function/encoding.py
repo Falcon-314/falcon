@@ -31,9 +31,8 @@ class LabelBlock(BaseBlock):
     def transform(self,input_df):
         transform_df = input_df.copy()
         transform_df[self.col].fillna('missing',inplace = True)
-        transform_df_enc = self.le.transform(transform_df[self.col])
-        return_df = pd.concat([input_df.drop(self.col,axis = 1),transform_df_enc],axis = 1)
-        return return_df
+        transform_df[self.col] = self.le.transform(transform_df[self.col])
+        return transform_df
 
 #One-Hot Encoding
 from sklearn.preprocessing import OneHotEncoder
@@ -66,7 +65,9 @@ class FreqBlock(BaseBlock):
         return self.transform(input_df)
     
     def transform(self,input_df): 
-        return input_df[self.col].map(self.meta_df)
+        return_df = input_df.copy()
+        return_df[self.col] = input_df[self.col].map(self.meta_df)
+        return return_df
 
 #Target encoding
 from sklearn.model_selection import KFold
