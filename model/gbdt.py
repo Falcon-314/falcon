@@ -2,8 +2,8 @@ import lightgbm as lgb
 import xgboost as xgb
 from catboost import CatBoost
 from catboost import Pool
-from sklearn.metrics import mean_squared_error
-from sklearn.linear_model import Ridge
+
+import wandb
 
 from abc import abstractmethod
 class Base_Model(object):
@@ -14,40 +14,12 @@ class Base_Model(object):
     @abstractmethod
     def predict(self, model, features):
         raise NotImplementedError
+   
 
-    def cv(self, y_train, train_features, test_features, fold_ids):
-        test_preds = np.zeros(len(test_features))
-        oof_preds = np.zeros(len(train_features))
-
-        for i_fold, (trn_idx, val_idx) in enumerate(fold_ids):
-            x_trn = train_features.iloc[trn_idx]
-            y_trn = y_train[trn_idx]
-            x_val = train_features.iloc[val_idx]
-            y_val = y_train[val_idx]
-
-            model = self.fit(x_trn, y_trn, x_val, y_val)
-
-            oof_preds[val_idx] = self.predict(model, x_val)
-            oof_score = np.sqrt(mean_squared_error(y_val, oof_preds[val_idx]))
-            print('fold{}:RMSLE{}'.format(i_fold,oof_score))
-            test_preds += self.predict(model, test_features) / len(fold_ids)
-
-        oof_score = np.sqrt(mean_squared_error(y_train, oof_preds))
-        print(f'oof score: {oof_score}')
-
-        evals_results = {"evals_result": {
-            "oof_score": oof_score,
-            "n_data": len(train_features),
-            "n_features": len(train_features.columns),
-        }}
-
-        return oof_preds, test_preds, evals_results
-cat_col = []
 class Lgbm(Base_Model):
-    def __init__(self,model_params):
+    def __init__(self,target_col,model_params,wandb,get_score,OUTPUT_DIR):
         self.model_params = model_params
         self.models = []
-        self.feature_cols = None
 
     def fit(self,x_train,y_train,x_valid,y_valid):
         lgb_train = lgb.Dataset(x_train,y_train)
@@ -86,6 +58,59 @@ class Lgbm(Base_Model):
         ax.grid()
         fig.tight_layout()
         return fig,ax
+ 
+from wandb.lightgbm import wandb_callback
+    callbacks=[wandb_callback()]
+    
+LOGGER.info(f"========== fold: {fold} training ==========")
+
+    # ====================================================
+    # dataset
+    # ====================================================
+    trn_idx = folds[folds['fold'] != fold].index
+    val_idx = folds[folds['fold'] == fold].index
+
+    train_folds = folds.loc[trn_idx].reset_index(drop=True)
+    valid_folds = folds.loc[val_idx].reset_index(drop=True)
+
+    trainData = lgb.Dataset(train_folds[features],train_folds[target_col])
+    validData = lgb.Dataset(valid_folds[features],valid_folds[target_col])
+
+    # ====================================================
+    # train
+    # ====================================================
+   
+    start_time = time.time()
+    
+    # train
+    model = lgb.train(param,
+                  trainData,
+                  valid_sets = [trainData, validData],
+                  num_boost_round = 10000,
+                  early_stopping_rounds = 100,
+                  verbose_eval = -1)
+
+    # eval
+    y_pred_valid = model.predict(valid_folds[features])
+            
+    # scoring
+    score = get_score(valid_folds[target_col], y_pred_valid)
+
+    elapsed = time.time() - start_time
+
+    LOGGER.info(f'Score: {score} - time: {elapsed:.0f}s')
+
+    # modelのsave
+    pickle.dump(model, open(OUTPUT_DIR+f'lgbm_fold{fold}.sav','wb'))
+    
+    # 出力用データセットへの代入
+    valid_folds['preds'] = y_pred_valid
+    
+    #重要度の出力
+    fold_importance_df = pd.DataFrame()
+    fold_importance_df["Feature"] = features
+    fold_importance_df["importance"] = model.feature_importance()
+    fold_importance_df["fold"] = fold
 
 class Cat(Base_Model):
     def __init__(self,model_params):
@@ -134,17 +159,4 @@ class Xgb(Base_Model):
     def predict(self,model,features):
         return model.predict(xgb.DMatrix(features))
 
-class Rid(Base_Model):
-    def __init__(self):
-      self.model = None
-    def fit(self,x_train,y_train,x_valid,y_valid):
-        model =Ridge(
-            alpha=1, #L2係数
-            max_iter=1000,
-            random_state=10,
-                              )
-        model.fit(x_train,y_train)
-        return model
 
-    def predict(self,model,features):
-      return model.predict(features)
