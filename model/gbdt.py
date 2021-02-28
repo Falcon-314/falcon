@@ -9,6 +9,7 @@ from catboost import Pool
 import wandb
 
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 from abc import abstractmethod
 class Base_Model(object):
@@ -104,7 +105,8 @@ class Cat(Base_Model):
 class Xgb(Base_Model):
     def __init__(self,model_params):
         self.model_params = model_params
-
+        self.model = None
+    
     def fit(self,x_train,y_train,x_valid,y_valid):
         xgb_train = xgb.DMatrix(x_train,label=y_train)
         xgb_valid = xgb.DMatrix(x_valid,label=y_valid)
@@ -113,14 +115,20 @@ class Xgb(Base_Model):
 
         model = xgb.train(self.model_params,
                          xgb_train,
-                         num_boost_round=2000,
-                         early_stopping_rounds=20,
+                         num_boost_round=3000,
+                         early_stopping_rounds=50,
                          evals=evals,
                          verbose_eval=False)
+        
+        self.model = model
+    
+    def predict(self,x_test):
+        return self.model.predict(xgb.DMatrix(x_test))
+        
+    def train(self,x_train,y_train,x_valid,y_valid):
+        self.fit(x_train,y_train,x_valid,y_valid)
+        oof_df = self.predict(xgb.DMatrix(x_valid))
+        return oof_df, self.model
 
-        return model
-
-    def predict(self,model,features):
-        return model.predict(xgb.DMatrix(features))
 
 
