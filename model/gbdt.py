@@ -1,3 +1,5 @@
+import pandas as pd
+
 import lightgbm as lgb
 import xgboost as xgb
 from catboost import CatBoost
@@ -73,6 +75,44 @@ class Lgbm(Base_Model):
 class Cat(Base_Model):
     def __init__(self,model_params):
         self.model_params = model_params
+        self.model = None
+
+    def fit(self,x_train,y_train,x_valid,y_valid):
+        lgb_train = lgb.Dataset(x_train,y_train)
+        lgb_valid = lgb.Dataset(x_valid,y_valid)
+
+        model = lgb.train(self.model_params,
+            train_set=lgb_train,
+            valid_sets=[lgb_valid],
+            valid_names=['valid'],
+            early_stopping_rounds=100,
+            num_boost_round=10000,
+            verbose_eval=False,
+            callbacks=[wandb_callback()])
+        
+        self.model = model
+
+    def predict(self,x_test):
+        return self.model.predict(x_test)
+    
+    def importance(self, features, fold):
+        fold_importance_df = pd.DataFrame()
+        fold_importance_df["Feature"] = features
+        fold_importance_df["importance"] = self.model.feature_importance()
+        fold_importance_df["fold"] = fold
+        return fold_importance_df
+        
+    def train(self,x_train,y_train,x_valid,y_valid):
+        self.fit(x_train,y_train,x_valid,y_valid)
+        oof_df = self.predict(x_valid)
+        return oof_df, self.model
+    
+    
+    
+    
+    def __init__(self,model_params):
+        self.model_params = model_params
+        
     def fit(self,x_train,y_train,x_valid,y_valid):
         train_pool = Pool(x_train,
                           label=y_train,
