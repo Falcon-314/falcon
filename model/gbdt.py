@@ -5,6 +5,8 @@ from catboost import Pool
 
 import wandb
 
+import matplotlib.pyplot as plt
+
 from abc import abstractmethod
 class Base_Model(object):
     @abstractmethod
@@ -15,11 +17,13 @@ class Base_Model(object):
     def predict(self, model, features):
         raise NotImplementedError
    
+from wandb.lightgbm import wandb_callback
+lgbm_callbacks=[wandb_callback()]
 
 class Lgbm(Base_Model):
-    def __init__(self,target_col,model_params,wandb,get_score,OUTPUT_DIR):
+    def __init__(self,model_params):
         self.model_params = model_params
-        self.models = []
+        self.model = None
 
     def fit(self,x_train,y_train,x_valid,y_valid):
         lgb_train = lgb.Dataset(x_train,y_train)
@@ -29,88 +33,42 @@ class Lgbm(Base_Model):
             train_set=lgb_train,
             valid_sets=[lgb_valid],
             valid_names=['valid'],
-            categorical_feature=cat_col,
-            early_stopping_rounds=20,
+            early_stopping_rounds=100,
             num_boost_round=10000,
-            verbose_eval=False)
-        self.models.append(model)
-        return model
+            verbose_eval=False.
+            callbacks=[wandb_callback()])
+        
+        self.model = model
 
-    def predict(self,model,features):
-        self.feature_cols = features.columns
-        return model.predict(features)
-
-    def visualize_importance(self):
-        feature_importance_df = pd.DataFrame()
-
-        for i,model in enumerate(self.models):
-            _df = pd.DataFrame()
-            _df['feature_importance'] = model.feature_importance(importance_type='gain')
-            _df['column'] = self.feature_cols
-            _df['fold'] = i+1
-            feature_importance_df = pd.concat([feature_importance_df,_df],axis=0,ignore_index=True)
-
-        order = feature_importance_df.groupby('column').sum()[['feature_importance']].sort_values('feature_importance',ascending=False).index[:50]
-
-        fig, ax = plt.subplots(figsize=(max(6, len(order) * .4), 7))
-        sns.boxenplot(data=feature_importance_df, x='column', y='feature_importance', order=order, ax=ax, palette='viridis')
-        ax.tick_params(axis='x', rotation=90)
-        ax.grid()
-        fig.tight_layout()
-        return fig,ax
- 
-from wandb.lightgbm import wandb_callback
-    callbacks=[wandb_callback()]
+    def predict(self,x_test):
+        return self.model.predict(x_test)
     
-LOGGER.info(f"========== fold: {fold} training ==========")
+    def importance(features, fold):
+        fold_importance_df = pd.DataFrame()
+        fold_importance_df["Feature"] = features
+        fold_importance_df["importance"] = self.model.feature_importance()
+        fold_importance_df["fold"] = fold
+        return fold_importance_df
+        
+    def train(self,x_train,y_train,x_valid,y_valid):
+        self.fit(self,x_train,y_train,x_valid,y_valid)
+        oof_df = self.predict(x_valid)
+        return oof_df, self.model       
 
-    # ====================================================
-    # dataset
-    # ====================================================
-    trn_idx = folds[folds['fold'] != fold].index
-    val_idx = folds[folds['fold'] == fold].index
+    def visualize_importance(self, importance_df, size = (8,8)):
+       cols = (importance_df[["Feature", "importance"]]
+            .groupby("Feature")
+            .mean()
+            .sort_values(by="importance", ascending=False)[:50].index)
 
-    train_folds = folds.loc[trn_idx].reset_index(drop=True)
-    valid_folds = folds.loc[val_idx].reset_index(drop=True)
+        best_features = importance_df.loc[importance_df.Feature.isin(cols)]
 
-    trainData = lgb.Dataset(train_folds[features],train_folds[target_col])
-    validData = lgb.Dataset(valid_folds[features],valid_folds[target_col])
-
-    # ====================================================
-    # train
-    # ====================================================
+        plt.figure(figsize=size)
+        sns.barplot(x="importance", y="Feature", data=best_features.sort_values(by="importance", ascending=False))
+        plt.title('Features importance (averaged/folds)')
+        plt.tight_layout() 
+    
    
-    start_time = time.time()
-    
-    # train
-    model = lgb.train(param,
-                  trainData,
-                  valid_sets = [trainData, validData],
-                  num_boost_round = 10000,
-                  early_stopping_rounds = 100,
-                  verbose_eval = -1)
-
-    # eval
-    y_pred_valid = model.predict(valid_folds[features])
-            
-    # scoring
-    score = get_score(valid_folds[target_col], y_pred_valid)
-
-    elapsed = time.time() - start_time
-
-    LOGGER.info(f'Score: {score} - time: {elapsed:.0f}s')
-
-    # modelのsave
-    pickle.dump(model, open(OUTPUT_DIR+f'lgbm_fold{fold}.sav','wb'))
-    
-    # 出力用データセットへの代入
-    valid_folds['preds'] = y_pred_valid
-    
-    #重要度の出力
-    fold_importance_df = pd.DataFrame()
-    fold_importance_df["Feature"] = features
-    fold_importance_df["importance"] = model.feature_importance()
-    fold_importance_df["fold"] = fold
 
 class Cat(Base_Model):
     def __init__(self,model_params):
