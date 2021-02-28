@@ -43,7 +43,7 @@ class Lgbm(Base_Model):
     def predict(self,x_test):
         return self.model.predict(x_test)
     
-    def importance(features, fold):
+    def importance(self, features, fold):
         fold_importance_df = pd.DataFrame()
         fold_importance_df["Feature"] = features
         fold_importance_df["importance"] = self.model.feature_importance()
@@ -51,7 +51,7 @@ class Lgbm(Base_Model):
         return fold_importance_df
         
     def train(self,x_train,y_train,x_valid,y_valid):
-        self.fit(self,x_train,y_train,x_valid,y_valid)
+        self.fit(x_train,y_train,x_valid,y_valid)
         oof_df = self.predict(x_valid)
         return oof_df, self.model       
 
