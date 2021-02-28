@@ -79,62 +79,27 @@ class Cat(Base_Model):
         self.model = None
 
     def fit(self,x_train,y_train,x_valid,y_valid):
-        lgb_train = lgb.Dataset(x_train,y_train)
-        lgb_valid = lgb.Dataset(x_valid,y_valid)
-
-        model = lgb.train(self.model_params,
-            train_set=lgb_train,
-            valid_sets=[lgb_valid],
-            valid_names=['valid'],
-            early_stopping_rounds=100,
-            num_boost_round=10000,
-            verbose_eval=False,
-            callbacks=[wandb_callback()])
+        train_pool = Pool(x_train,label=y_train)
+        valid_pool = Pool(x_valid,label=y_valid)
+        
+        model = CatBoost(self.model_params)
+        model.fit(train_pool,
+                  early_stopping_rounds=50,
+                  plot=False,
+                  use_best_model=True,
+                  eval_set=[valid_pool],
+                  verbose=False)
         
         self.model = model
 
     def predict(self,x_test):
         return self.model.predict(x_test)
-    
-    def importance(self, features, fold):
-        fold_importance_df = pd.DataFrame()
-        fold_importance_df["Feature"] = features
-        fold_importance_df["importance"] = self.model.feature_importance()
-        fold_importance_df["fold"] = fold
-        return fold_importance_df
         
     def train(self,x_train,y_train,x_valid,y_valid):
         self.fit(x_train,y_train,x_valid,y_valid)
         oof_df = self.predict(x_valid)
         return oof_df, self.model
     
-    
-    
-    
-    def __init__(self,model_params):
-        self.model_params = model_params
-        
-    def fit(self,x_train,y_train,x_valid,y_valid):
-        train_pool = Pool(x_train,
-                          label=y_train,
-                          cat_features=cat_col)
-        valid_pool = Pool(x_valid,
-                          label=y_valid,
-                          cat_features=cat_col)
-
-        model = CatBoost(self.model_params)
-        model.fit(train_pool,
-                  early_stopping_rounds=30,
-                 plot=False,
-                 use_best_model=True,
-                 eval_set=[valid_pool],
-                  verbose=False)
-
-        return model
-
-    def predict(self,model,features):
-      pred = model.predict(features)
-      return pred
 
 class Xgb(Base_Model):
     def __init__(self,model_params):
