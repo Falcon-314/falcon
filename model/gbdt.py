@@ -35,7 +35,7 @@ class Lgbm(Base_Model):
             valid_names=['valid'],
             early_stopping_rounds=100,
             num_boost_round=10000,
-            verbose_eval=False.
+            verbose_eval=False,
             callbacks=[wandb_callback()])
         
         self.model = model
