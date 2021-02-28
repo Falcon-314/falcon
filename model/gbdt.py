@@ -61,12 +61,12 @@ class Lgbm(Base_Model):
             .mean()
             .sort_values(by="importance", ascending=False)[:50].index)
 
-        best_features = importance_df.loc[importance_df.Feature.isin(cols)]
+       best_features = importance_df.loc[importance_df.Feature.isin(cols)]
 
-        plt.figure(figsize=size)
-        sns.barplot(x="importance", y="Feature", data=best_features.sort_values(by="importance", ascending=False))
-        plt.title('Features importance (averaged/folds)')
-        plt.tight_layout() 
+       plt.figure(figsize=size)
+       sns.barplot(x="importance", y="Feature", data=best_features.sort_values(by="importance", ascending=False))
+       plt.title('Features importance (averaged/folds)')
+       plt.tight_layout() 
     
    
 
