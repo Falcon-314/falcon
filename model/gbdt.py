@@ -58,7 +58,7 @@ class Lgbm(Base_Model):
         oof_df = self.predict(x_valid)
         return oof_df, self.model       
 
-    def visualize_importance(self, importance_df, size = (8,8)):
+    def visualize(self, importance_df, size = (8,8)):
        cols = (importance_df[["Feature", "importance"]]
             .groupby("Feature")
             .mean()
