@@ -126,7 +126,7 @@ def get_function(block,is_train):
     }.get(is_train)
     return getattr(block,s)
 
-#feature_enginnering run #return:only preprocessed columns
+#feature_enginnering run
 def run_createfe(input_df,blocks,is_train=False):
     out_df = input_df.copy()
     for block in tqdm(blocks,total=len(blocks)):
@@ -136,10 +136,22 @@ def run_createfe(input_df,blocks,is_train=False):
         out_df = pd.concat([out_df,_df],axis=1)
     return out_df
 
-#preprocessed run #return:all columns
+#preprocessed run
 def run_preprocess(input_df,blocks,is_train=False):
     out_df = input_df.copy()
     for block in tqdm(blocks,total=len(blocks)):
         func = get_function(block,is_train)
         out_df = func(out_df)
     return out_df 
+
+#preprocessed run concat
+def run_preprocess_concat(input_train, input_test, blocks):
+    input_train['part'] = 'train'
+    input_test['part'] = 'test'
+    all_df = pd.concat([input_train,input_test],axis = 0).reset_index(drop = True)   
+    for block in tqdm(blocks,total=len(blocks)):
+        func = get_function(block,True)
+        all_df = func(all_df)
+    output_train = all_df[all_df['part'] == 'train'].reset_index(drop = True).drop('part', axis = 1)
+    output_test = all_df[all_df['part'] == 'test'].reset_index(drop = True).drop('part', axis = 1)
+    return output_train, output_test
