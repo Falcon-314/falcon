@@ -233,3 +233,42 @@ class Lag_DiffBlock(BaseBlock):
         output_df = input_df.groupby(self.ids)[self.cols].diff(self.lag)
         return output_df.add_prefix('Lag_{}_'.format(self.lag))
 
+#MeanLag
+class MeanLagBlock(BaseBlock):
+    
+    def __init__(self,lag:int,ids,cols):
+        self.lag = lag
+        self.ids = ids
+        self.cols = cols
+        self.meta_df = None
+        
+    def fit(self,input_df):
+        tmp = input_df.copy()
+        tmp[self.ids] = tmp[self.ids] + self.lag
+        tmp = tmp.rename(columns = {self.cols : self.cols + '_meanLag'})
+        tmp = tmp.groupby(self.ids)[self.cols + '_meanLag'].mean()
+        self.meta_df = tmp
+        return self.transform(input_df)
+
+    def transform(self,input_df):
+        return pd.merge(input_df,self.meta_df, on = self.ids, how = 'left')[self.cols + '_meanLag']
+
+#StdLag
+class MeanLagBlock(BaseBlock):
+    
+    def __init__(self,lag:int,ids,cols):
+        self.lag = lag
+        self.ids = ids
+        self.cols = cols
+        self.meta_df = None
+        
+    def fit(self,input_df):
+        tmp = input_df.copy()
+        tmp[self.ids] = tmp[self.ids] + self.lag
+        tmp = tmp.rename(columns = {self.cols : self.cols + '_stdLag'})
+        tmp = tmp.groupby(self.ids)[self.cols + '_stdLag'].std()
+        self.meta_df = tmp
+        return self.transform(input_df)
+
+    def transform(self,input_df):
+        return pd.merge(input_df,self.meta_df, on = self.ids, how = 'left')[self.cols + '_stdLag']
