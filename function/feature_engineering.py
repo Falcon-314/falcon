@@ -191,7 +191,7 @@ class Agg_MergeBlock(BaseBlock):
                 _aggs.append(agg)
             else:
                 _aggs.append(agg.__name__)
-        self.columns_name = self.key + ["_".join(self.key+[c,agg]) for c in cols for agg in _aggs]
+        self.columns_name = self.key + ["_".join(self.key+[c,agg]) for c in self.cols for agg in _aggs]
         _add.columns = self.columns_name
         self.meta_df = _add
         return self.transform(df)
