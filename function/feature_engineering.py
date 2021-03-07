@@ -172,7 +172,7 @@ class Flag_count_Block(BaseBlock):
 
 #---merge additional data---#
 class Agg_MergeBlock(BaseBlock):
-    def __init__(self,key:str,cols,agg_settings, add):
+    def __init__(self,key:list,cols:list,agg_settings:list, add):
         self.key = key
         self.meta_df =None
         self.columns_name = None
@@ -191,9 +191,8 @@ class Agg_MergeBlock(BaseBlock):
                 _aggs.append(agg)
             else:
                 _aggs.append(agg.__name__)
-        self.columns_name = [self.key] + ["_".join([c, agg, self.key]) for c in self.cols for agg in _aggs]
+        self.columns_name = self.key + ["_".join(self.key+[c,agg]) for c in cols for agg in _aggs]
         _add.columns = self.columns_name
-
         self.meta_df = _add
         return self.transform(df)
     
