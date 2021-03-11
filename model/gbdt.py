@@ -79,8 +79,8 @@ class Cat(Base_Model):
         self.model = None
 
     def fit(self,x_train,y_train,x_valid,y_valid):
-        train_pool = Pool(x_train,label=y_train)
-        valid_pool = Pool(x_valid,label=y_valid)
+        train_pool = Pool(x_train,label=y_train,cat_index)
+        valid_pool = Pool(x_valid,label=y_valid,cat_index)
         
         model = CatBoost(self.model_params)
         model.fit(train_pool,
@@ -100,7 +100,6 @@ class Cat(Base_Model):
         oof_df = self.predict(x_valid)
         return oof_df, self.model
     
-
 class Xgb(Base_Model):
     def __init__(self,model_params):
         self.model_params = model_params
@@ -117,7 +116,8 @@ class Xgb(Base_Model):
                          num_boost_round=3000,
                          early_stopping_rounds=50,
                          evals=evals,
-                         verbose_eval=False)
+                         verbose_eval=False,
+                         callbacks=[wandb.xgboost.wandb_callback()]) #custom metricを使用する場合obj = ***を追加
         
         self.model = model
     
@@ -126,7 +126,7 @@ class Xgb(Base_Model):
         
     def train(self,x_train,y_train,x_valid,y_valid):
         self.fit(x_train,y_train,x_valid,y_valid)
-        oof_df = self.predict(xgb.DMatrix(x_valid))
+        oof_df = self.predict(x_valid)
         return oof_df, self.model
 
 
