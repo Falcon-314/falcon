@@ -1,3 +1,5 @@
+#debug modeの機能
+
 import pandas as pd
 
 import lightgbm as lgb
