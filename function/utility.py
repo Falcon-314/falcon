@@ -9,6 +9,10 @@ import pandas as pd
 import numpy as np
 import tensorflow as tf
 
+import seaborn as sns
+import matplotlib.pyplot as plt
+import matplotlib.figure as figure
+
 from tqdm import tqdm
 from contextlib import contextmanager
 
@@ -100,6 +104,14 @@ def reduce_mem_usage(df, verbose=True):
     end_mem = df.memory_usage().sum() / 1024**2
     if verbose: print('Mem. usage decreased to {:5.2f} Mb ({:.1f}% reduction)'.format(end_mem, 100 * (start_mem - end_mem) / start_mem))
     return df
+
+#---visualize---#
+def columns_name(data):
+    print(np.array2string(data.columns, separator=', ', formatter={'float_kind': lambda x: '{: .4f}'.format(x)})) 
+
+def corr_map(data,collist):
+    plt.figure(figsize=(12, 12)) 
+    sns.heatmap(data = data[collist].corr().round(2),annot=True,cmap='coolwarm',linewidths=0.2,square=True)
 
 #---preprocess---#
 #BaseBlock
