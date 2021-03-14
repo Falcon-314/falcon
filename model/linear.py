@@ -10,7 +10,7 @@ class Base_Model(object):
     def predict(self, model, features):
         raise NotImplementedError
 
-class Rid(Base_Model):
+class LinearRidge(Base_Model):
     def __init__(self, model_params):
         self.model_params = model_params
         self.model = None
@@ -29,7 +29,7 @@ class Rid(Base_Model):
         oof_df = self.predict(x_valid)
         return oof_df, self.model   
 
-class Lasso(Base_Model):
+class LinearLasso(Base_Model):
     def __init__(self, model_params):
         self.model_params = model_params
         self.model = None
