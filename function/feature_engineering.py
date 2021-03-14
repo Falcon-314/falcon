@@ -201,7 +201,6 @@ class Agg_MergeBlock(BaseBlock):
         return df[self.columns_name].drop(self.key, axis = 1)
 
 #---time series feature---#
-#Lag feature
 class LagBlock(BaseBlock):
     
     def __init__(self,lag:int,ids,cols):
@@ -213,12 +212,12 @@ class LagBlock(BaseBlock):
         return self.transform(input_df)
 
     def transform(self,input_df):
-        output_df = input_df.groupby(self.ids)[self.cols].lag(self.lag)
+        output_df = input_df.groupby(self.ids)[self.cols].shift(self.lag)
         return output_df.add_prefix('Lag_{}_'.format(self.lag))
     
     
 #Lag feature (diff)
-class Lag_DiffBlock(BaseBlock):
+class DiffLagBlock(BaseBlock):
     
     def __init__(self,lag:int,ids,cols):
         self.lag = lag
@@ -230,44 +229,52 @@ class Lag_DiffBlock(BaseBlock):
 
     def transform(self,input_df):
         output_df = input_df.groupby(self.ids)[self.cols].diff(self.lag)
-        return output_df.add_prefix('Lag_{}_'.format(self.lag))
+        return output_df.add_prefix('DiffLag_{}_'.format(self.lag))
 
 #MeanLag
 class MeanLagBlock(BaseBlock):
     
-    def __init__(self,lag:int,ids,cols):
-        self.lag = lag
+    def __init__(self,window:int,ids,cols):
+        self.window = window
         self.ids = ids
         self.cols = cols
         self.meta_df = None
         
     def fit(self,input_df):
-        tmp = input_df.copy()
-        tmp[self.ids] = tmp[self.ids] + self.lag
-        tmp = tmp.rename(columns = {self.cols : self.cols + '_meanLag'})
-        tmp = tmp.groupby(self.ids)[self.cols + '_meanLag'].mean()
-        self.meta_df = tmp
         return self.transform(input_df)
 
     def transform(self,input_df):
-        return pd.merge(input_df,self.meta_df, on = self.ids, how = 'left')[self.cols + '_meanLag']
+        output_df = input_df.groupby(self.ids,sort = False)[self.cols].rolling(window=self.window).mean().reset_index(drop=True)
+        return output_df.add_prefix('MeanLag_{}_'.format(3))
 
 #StdLag
-class MeanLagBlock(BaseBlock):
+class StdLagBlock(BaseBlock):
     
-    def __init__(self,lag:int,ids,cols):
-        self.lag = lag
+    def __init__(self,window:int,ids,cols):
+        self.window = window
         self.ids = ids
         self.cols = cols
         self.meta_df = None
         
     def fit(self,input_df):
-        tmp = input_df.copy()
-        tmp[self.ids] = tmp[self.ids] + self.lag
-        tmp = tmp.rename(columns = {self.cols : self.cols + '_stdLag'})
-        tmp = tmp.groupby(self.ids)[self.cols + '_stdLag'].std()
-        self.meta_df = tmp
         return self.transform(input_df)
 
     def transform(self,input_df):
-        return pd.merge(input_df,self.meta_df, on = self.ids, how = 'left')[self.cols + '_stdLag']
+        output_df = input_df.groupby(self.ids)[self.cols].rolling(window=self.window).std().reset_index(drop=True)
+        return output_df.add_prefix('StdLag_{}_'.format(self.window))
+
+#SumLag
+class SumLagBlock(BaseBlock):
+    
+    def __init__(self,window:int,ids,cols):
+        self.window = window
+        self.ids = ids
+        self.cols = cols
+        self.meta_df = None
+        
+    def fit(self,input_df):
+        return self.transform(input_df)
+
+    def transform(self,input_df):
+        output_df = input_df.groupby(self.ids)[self.cols].rolling(window=self.window).sum().reset_index(drop=True)
+        return output_df.add_prefix('SumLag_{}_'.format(self.window))
