@@ -48,9 +48,8 @@ class Lasso(Base_Model):
         oof_df = self.predict(x_valid)
         return oof_df, self.model   
     
- class LinearReg(Base_Model):
-    def __init__(self, model_params):
-        self.model_params = model_params
+class LinearReg(Base_Model):
+    def __init__(self):
         self.model = None
     
     def fit(self,x_train,y_train):
