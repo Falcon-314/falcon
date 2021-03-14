@@ -67,8 +67,7 @@ class LinearReg(Base_Model):
         return oof_df, self.model      
     
 class BayesReg(Base_Model):
-    def __init__(self, model_params):
-        self.model_params = model_params
+    def __init__(self):
         self.model = None
     
     def fit(self,x_train,y_train):
