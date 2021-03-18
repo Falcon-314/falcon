@@ -89,6 +89,13 @@ class Cat(Base_Model):
         oof_df = self.predict(x_valid)
         return oof_df, self.model
     
+    def importance(self, features, fold):
+        fold_importance_df = pd.DataFrame()
+        fold_importance_df["Feature"] = features
+        fold_importance_df["importance"] = self.model.get_feature_importance(pool)
+        fold_importance_df["fold"] = fold
+        return fold_importance_df
+    
 class Xgb(Base_Model):
     def __init__(self,model_params):
         self.model_params = model_params
