@@ -92,7 +92,7 @@ class Cat(Base_Model):
     def importance(self, features, fold):
         fold_importance_df = pd.DataFrame()
         fold_importance_df["Feature"] = features
-        fold_importance_df["importance"] = self.model.get_feature_importance(pool)
+        fold_importance_df["importance"] = self.model.get_feature_importance()
         fold_importance_df["fold"] = fold
         return fold_importance_df
     
