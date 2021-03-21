@@ -127,9 +127,11 @@ class Xgb(Base_Model):
         return oof_df, self.model
     
     def importance(self, features, fold):
+        importance_list = self.model.get_fscore()
         fold_importance_df = pd.DataFrame()
         fold_importance_df["Feature"] = features
-        fold_importance_df["importance"] = self.model.feature_importances_
+        for importance in features:
+            fold_importance_df.loc[fold_importance_df['feature'] == importance, "importance"] = importance_list[importance]
         fold_importance_df["fold"] = fold
         return fold_importance_df
 
