@@ -146,3 +146,15 @@ def visualize(importance_df, size = (8,8)):
     sns.barplot(x="importance", y="Feature", data=best_features.sort_values(by="importance", ascending=False))
     plt.title('Features importance (averaged/folds)')
     plt.tight_layout() 
+
+    
+def get_gbdt(model_name, params):
+    if model_name == 'lgbm':
+        model = Lgbm(params)
+    elif model_name == 'xgb':
+        model = Xgb(params)
+    elif model_name = 'cat':
+        model = Cat(params)
+    else:
+        print('no model name')
+    return model
