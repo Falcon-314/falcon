@@ -155,7 +155,7 @@ def get_gbdt(model_name, params):
         model = Lgbm(params)
     elif model_name == 'xgb':
         model = Xgb(params)
-    elif model_name = 'cat':
+    elif model_name == 'cat':
         model = Cat(params)
     else:
         print('no model name')
