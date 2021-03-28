@@ -109,8 +109,8 @@ class Xgb(Base_Model):
 
         model = xgb.train(self.model_params,
                           xgb_train,
-                          num_boost_round=2000,
-                          early_stopping_rounds=20,
+                          num_boost_round=10000,
+                          early_stopping_rounds=50,
                           evals=evals,
                           verbose_eval=False,
                           callbacks=[wandb.xgboost.wandb_callback()]) #obj=huber_approx_obj...
