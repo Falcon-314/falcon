@@ -3,8 +3,7 @@ from sklearn.model_selection import KFold
 from sklearn.model_selection import StratifiedKFold
 from sklearn.model_selection import GroupKFold
 
-
-def split(train, CFG):
+def cvsplit(train, CFG):
     if CFG.fold_type == 'KFold':
         Fold = KFold(n_splits=CFG.n_fold, shuffle=True, random_state=CFG.seed)
         for n, (train_index, val_index) in enumerate(Fold.split(train,train[CFG.target_col])):
