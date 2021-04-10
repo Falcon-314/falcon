@@ -20,4 +20,4 @@ class BaseBlock(object):
         return self.return_df
 
     def save(self, filename):
-        self.return_df.to_feather(CFG.FEATURE_PATH + filename + '.ftr')
+        self.return_df.to_feather(self.CFG.FEATURE_PATH + filename + '.ftr')
