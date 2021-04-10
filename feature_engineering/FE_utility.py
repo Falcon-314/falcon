@@ -14,6 +14,9 @@ class BaseBlock(object):
     
     def transform(self,input_df):
         self.return_df = input_df
+        return self
+    
+    def view(self):
         return self.return_df
 
     def save(self, filename):
