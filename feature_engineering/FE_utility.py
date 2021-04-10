@@ -13,7 +13,8 @@ class BaseBlock(object):
         return self
     
     def transform(self,input_df):
-        return self.meta_df
+        self.return_df = input_df
+        return self.return_df
 
     def save(self, filename):
-        self.meta_df.to_feather(CFG.FEATURE_PATH + filename + '.ftr')
+        self.return_df.to_feather(CFG.FEATURE_PATH + filename + '.ftr')
