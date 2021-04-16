@@ -65,13 +65,8 @@ class CalcBlock(BaseBlock):
             self.return_df = pd.merge(df, self.meta_df, on = CFG.ID_col, how = 'left')[[CFG.ID_col,self.col1 + '_devided_' + self.col2]]
         return self
       
-    
 # =======================
 # Aggregation
-# =======================
-
-# =======================
-# Basic Aggregation
 # =======================
 class AggBlock(BaseBlock):
     def __init__(self,CFG,key:list,col,agg_setting,agg_name):
@@ -93,33 +88,9 @@ class AggBlock(BaseBlock):
         self.return_df = pd.merge(df, self.meta_df, on = CFG.ID_col, how = 'left')
         return self
 
-      
 # =======================
-# Aggregation&Calculate
-# =======================      
-class AggCalcBlock(BaseBlock):
-    def __init__(self,key:str,col,agg,mode):
-        self.key = key
-        self.columns_name = None
-        self.col = col
-        self.agg = agg
-        self.mode = mode
-
-    def fit(self,input_df):
-        return self.transform(input_df)
-    
-    def transform(self,input_df):
-        output_df = pd.DataFrame()
-        if self.mode == 'ratio':
-            output_df[self.col + '_ratio_' + f'{self.key}'] =  input_df[self.col] / input_df[self.col + f'_{self.agg}_' + f'{self.key}']
-            return_df = output_df[self.col + '_ratio_' + f'{self.key}']
-        if self.mode == 'diff':
-            output_df[self.col + '_diff_' + f'{self.key}'] =  input_df[self.col] - input_df[self.col + f'_{self.agg}_' + f'{self.key}']
-            return_df = output_df[self.col + '_diff_' + f'{self.key}']
-        return return_df    
-    
-
-#conmination categorical feature
+# Conmination categorical feature
+# =======================
 class CombinationBlock(BaseBlock):
     
     def __init__(self,col1,col2):
