@@ -3,6 +3,9 @@
 # =======================
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.figure as figure
+import seaborn as sns
 
 # =======================
 # BaseBlock
@@ -24,6 +27,25 @@ class BaseBlock(object):
 
     def save(self, filename):
         self.return_df.to_csv(self.CFG.FEATURE_PATH + filename + '.csv',index=False)
+        
+    def hist(self, feature):
+        sns.distplot(df[feature])
+        plt.show()
+        
+    def scatter(self, df, feature, target):
+        df_tmp = pd.merge(df,self.return_df,on = CFG.ID_col, how = 'left')
+        sns.scatterplot(df_tmp[feature], df_tmp[target])
+        plt.show()
+        corr_score = np.corrcoef(df_tmp[feature], df_tmp[target])[0,1]
+        print('相関係数：', corr_score)
+      
+# =======================
+# Feature Loading
+# =======================
+def feature_load(CFG, df, file_name):
+    load_df = pd.read_csv(CFG.FEATURE_PATH + file_name)
+    df = pd.merge(df,load_df,on = CFG.ID_col, how = 'left')
+    return df
 
 # =======================
 # Basic Feature Engineering
@@ -94,17 +116,17 @@ class AggBlock(BaseBlock):
 class CombinationBlock(BaseBlock):
     
     def __init__(self,col1,col2):
-        self.lag = lag
         self.col1 = col1
         self.col2 = col2
 
     def fit(self,input_df):
-        return self.transform(input_df)
+        self.meta_df = input_df
+        return self
     
     def transform(self,input_df):
         remain_df = input_df.copy()
         remain_df[self.col1 + 'and' + self.col2] = input_df[self.col1].astype('str') + input_df[self.col2].astype('str')
-        return remain_df[self.col1 + 'and' + self.col2]
+        return self
        
 #binning
 class BinningBlock(BaseBlock):
