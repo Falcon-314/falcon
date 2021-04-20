@@ -27,17 +27,6 @@ class BaseBlock(object):
 
     def save(self, filename):
         self.return_df.to_csv(self.CFG.FEATURE_PATH + filename + '.csv',index=False)
-        
-    def hist(self, feature):
-        sns.distplot(df[feature])
-        plt.show()
-        
-    def scatter(self, df, feature, target):
-        df_tmp = pd.merge(df,self.return_df,on = CFG.ID_col, how = 'left')
-        sns.scatterplot(df_tmp[feature], df_tmp[target])
-        plt.show()
-        corr_score = np.corrcoef(df_tmp[feature], df_tmp[target])[0,1]
-        print('相関係数：', corr_score)
       
 # =======================
 # Feature Loading
