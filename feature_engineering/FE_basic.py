@@ -7,6 +7,8 @@ import matplotlib.pyplot as plt
 import matplotlib.figure as figure
 import seaborn as sns
 
+from sklearn.model_selection import KFold
+
 # =======================
 # BaseBlock
 # =======================
@@ -289,3 +291,60 @@ class SumLagBlock(BaseBlock):
         output_df = input_df.groupby(self.ids)[self.cols].rolling(window=self.window).sum().reset_index(drop=True)
         return output_df.add_prefix('SumLag_{}_'.format(self.window))
 
+# ==============================
+# Encoding
+# ==============================
+
+
+
+class TargetBlock(BaseBlock):
+    def __init__(self, CFG, feature, target):
+        self.CFG= CFG
+        self.feature= feature
+        self.target = target
+
+    def fit_transform(self, train, test):
+        self.return_df = {}
+        for fold in range(self.CFG.n_fold):
+            if fold in self.CFG.trn_fold:
+                #t rainとvalidに分割
+                trn_idx = train[train['fold'] != fold].index
+                val_idx = train[train['fold'] == fold].index
+                train_df = train.loc[trn_idx]
+                valid_df = train.loc[val_idx]
+                        
+                # validに対するtarget encoding
+                data_tmp = pd.DataFrame({self.feature: train_df[self.feature], 'target': train_df[self.target]})
+                target_mean = data_tmp.groupby(self.feature)['target'].mean()
+                valid_df.loc[:, self.feature + '_' + self.target + '_target'] = valid_df[self.feature].map(target_mean)
+
+                # trainに対するtarget encoding
+                tmp = np.repeat(np.nan, train_df.shape[0])
+                kf_encoding = KFold(n_splits=5, shuffle=True, random_state=37)
+                for idx_1, idx_2 in kf_encoding.split(train_df, train_df[self.feature]):
+                    target_mean = data_tmp.iloc[idx_1].groupby(self.feature)['target'].mean()
+                    tmp[idx_2] = train_df[self.feature].iloc[idx_2].map(target_mean)
+                train_df.loc[:, self.feature + '_' + self.target + '_target'] = tmp
+                
+                # train_dfとvalid_dfを結合
+                fold_df = pd.concat([train_df[[self.CFG.ID_col, self.feature + '_' + self.target + '_target']], valid_df[[self.CFG.ID_col, self.feature + '_' + self.target + '_target']]], axis = 0)
+
+                # dfの保存
+                self.return_df['fold_' + str(fold)] = fold_df
+
+        # testに対するtarget encoding
+        data_tmp = pd.DataFrame({self.feature: train[self.feature], 'target': train[self.target]})
+        target_mean = data_tmp.groupby(self.feature)['target'].mean()
+        test.loc[:, self.feature + '_' + self.target + '_target'] = test[self.feature].map(target_mean)
+        test_df = test[[self.CFG.ID_col, self.feature + '_' + self.target + '_target']]
+
+        self.return_df['test'] = test_df
+
+        return self
+
+    def save(self, filename):
+        for fold in range(self.CFG.n_fold):
+            if fold in self.CFG.trn_fold:
+                self.return_df['fold_' + str(fold)].to_csv(self.CFG.FEATURE_PATH + filename + '_fold_' + str(fold) + '.csv',index=False)
+
+        self.return_df['test'].to_csv(self.CFG.FEATURE_PATH + filename + '_test' + '.csv',index=False)
