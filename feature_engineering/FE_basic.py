@@ -295,8 +295,26 @@ class SumLagBlock(BaseBlock):
 # Encoding
 # ==============================
 
+# ==============================
+# Frequency Encoding
+# ==============================
+class FreqBlock(BaseBlock):
+    def __init__(self, CFG, freq_col):
+        self.CFG = CFG
+        self.freq_col = freq_col
 
+    def fit(self, df):
+        self.meta_df = df[self.freq_col].value_counts()
+        return self
 
+    def transform(self, df):
+        df[self.freq_col + '_freq'] = df[self.freq_col].map(self.meta_df)
+        self.return_df = df[[CFG.ID_col, self.freq_col + '_freq']]
+        return self
+
+# ==============================
+# Target Encoding
+# ==============================
 class TargetBlock(BaseBlock):
     def __init__(self, CFG, feature, target):
         self.CFG= CFG
