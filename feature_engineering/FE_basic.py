@@ -47,7 +47,8 @@ def feature_load(CFG, df, file_name):
 # =======================
 class CalcBlock(BaseBlock):
    
-    def __init__(self,col1,col2,mode):
+    def __init__(self, CFG, col1, col2, mode):
+        self.CFG = CFG
         self.col1 = col1
         self.col2 = col2
         self.mode = mode
