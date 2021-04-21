@@ -56,27 +56,27 @@ class CalcBlock(BaseBlock):
     def fit(self,df):
         if self.mode == 'plus':
             df[self.col1 + '_plus_' + self.col2] = df[self.col1] + df[self.col2]
-            self.meta_df = df[[CFG.ID_col, self.col1 + '_plus_' + self.col2]]
+            self.meta_df = df[[self.CFG.ID_col, self.col1 + '_plus_' + self.col2]]
         if self.mode == 'minus':
             df[self.col1 + '_minus_' + self.col2] = df[self.col1] - df[self.col2]
-            self.meta_df = df[[CFG.ID_col, self.col1 + '_minus_' + self.col2]]
+            self.meta_df = df[[self.CFG.ID_col, self.col1 + '_minus_' + self.col2]]
         if self.mode == 'times':
             df[self.col1 + '_times_' + self.col2] = df[self.col1] - df[self.col2]
-            self.meta_df = df[[CFG.ID_col, self.col1 + '_times_' + self.col2]]
+            self.meta_df = df[[self.CFG.ID_col, self.col1 + '_times_' + self.col2]]
         if self.mode == 'devided':
             df[self.col1 + '_devided_' + self.col2] = df[self.col1] - df[self.col2]
-            self.meta_df = df[[CFG.ID_col, self.col1 + '_devided_' + self.col2]]
+            self.meta_df = df[[self.CFG.ID_col, self.col1 + '_devided_' + self.col2]]
         return self
 
     def transform(self,df):
         if self.mode == 'plus':
-            self.return_df = pd.merge(df, self.meta_df, on = CFG.ID_col, how = 'left')[[CFG.ID_col,self.col1 + '_plus_' + self.col2]]
+            self.return_df = pd.merge(df, self.meta_df, on = self.CFG.ID_col, how = 'left')[[self.CFG.ID_col,self.col1 + '_plus_' + self.col2]]
         if self.mode == 'minus':
-            self.return_df = pd.merge(df, self.meta_df, on = CFG.ID_col, how = 'left')[[CFG.ID_col,self.col1 + '_minus_' + self.col2]]
+            self.return_df = pd.merge(df, self.meta_df, on = self.CFG.ID_col, how = 'left')[[self.CFG.ID_col,self.col1 + '_minus_' + self.col2]]
         if self.mode == 'times':
-            self.return_df = pd.merge(df, self.meta_df, on = CFG.ID_col, how = 'left')[[CFG.ID_col,self.col1 + '_times_' + self.col2]]
+            self.return_df = pd.merge(df, self.meta_df, on = self.CFG.ID_col, how = 'left')[[self.CFG.ID_col,self.col1 + '_times_' + self.col2]]
         if self.mode == 'devided':
-            self.return_df = pd.merge(df, self.meta_df, on = CFG.ID_col, how = 'left')[[CFG.ID_col,self.col1 + '_devided_' + self.col2]]
+            self.return_df = pd.merge(df, self.meta_df, on = self.CFG.ID_col, how = 'left')[[self.CFG.ID_col,self.col1 + '_devided_' + self.col2]]
         return self
       
 # =======================
