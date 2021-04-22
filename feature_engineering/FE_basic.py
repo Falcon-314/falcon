@@ -71,7 +71,41 @@ class CalcBlock(BaseBlock):
             df_tmp[self.col1 + '_devided_' + self.col2] = df[self.col1] / df[self.col2]
             self.return_df = df_tmp[[self.CFG.ID_col, self.col1 + '_devided_' + self.col2]]
         return self
-      
+    
+# =======================
+# Count
+# =======================  
+class CountBlock(BaseBlock):
+    def __init__(self, CFG, cols, count_name):
+        self.CFG = CFG
+        self.cols = cols
+        self.count_name = count_name
+
+    def fit(self, df):
+        return self
+
+    def transform(self, df):
+        df_tmp = pd.DataFrame(df[self.CFG.ID_col])
+        df_tmp[self.count_name] = df[self.cols].sum(axis = 1)
+        self.return_df = df_tmp
+        return self
+
+class CountZeroBlock(BaseBlock):
+    def __init__(self, CFG, cols, count_name):
+        self.CFG = CFG
+        self.cols = cols
+        self.count_name = count_name
+
+    def fit(self, df):
+        return self
+
+    def transform(self, df):
+        df_tmp = pd.DataFrame(df[self.CFG.ID_col])
+        df_tmp[self.count_name] = (df[self.cols] == 0).sum(axis=1)
+        self.return_df = df_tmp
+        return self
+
+
 # =======================
 # Aggregation
 # =======================
