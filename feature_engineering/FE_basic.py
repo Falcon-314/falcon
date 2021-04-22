@@ -54,23 +54,22 @@ class CalcBlock(BaseBlock):
         self.mode = mode
         
     def fit(self,df):
-        df_tmp = pd.DataFrame(df[self.CFG.ID_col])
-        if self.mode == 'plus':
-            df_tmp[self.col1 + '_plus_' + self.col2] = df[self.col1] + df[self.col2]
-            self.meta_df = df_tmp[[self.CFG.ID_col, self.col1 + '_plus_' + self.col2]]
-        if self.mode == 'minus':
-            df_tmp[self.col1 + '_minus_' + self.col2] = df[self.col1] - df[self.col2]
-            self.meta_df = df_tmp[[self.CFG.ID_col, self.col1 + '_minus_' + self.col2]]
-        if self.mode == 'times':
-            df_tmp[self.col1 + '_times_' + self.col2] = df[self.col1] * df[self.col2]
-            self.meta_df = df_tmp[[self.CFG.ID_col, self.col1 + '_times_' + self.col2]]
-        if self.mode == 'devided':
-            df_tmp[self.col1 + '_devided_' + self.col2] = df[self.col1] / df[self.col2]
-            self.meta_df = df_tmp[[self.CFG.ID_col, self.col1 + '_devided_' + self.col2]]
         return self
 
     def transform(self,df):
-        self.return_df = self.meta_df
+        df_tmp = pd.DataFrame(df[self.CFG.ID_col])
+        if self.mode == 'plus':
+            df_tmp[self.col1 + '_plus_' + self.col2] = df[self.col1] + df[self.col2]
+            self.return_df = df_tmp[[self.CFG.ID_col, self.col1 + '_plus_' + self.col2]]
+        if self.mode == 'minus':
+            df_tmp[self.col1 + '_minus_' + self.col2] = df[self.col1] - df[self.col2]
+            self.return_df = df_tmp[[self.CFG.ID_col, self.col1 + '_minus_' + self.col2]]
+        if self.mode == 'times':
+            df_tmp[self.col1 + '_times_' + self.col2] = df[self.col1] * df[self.col2]
+            self.return_df = df_tmp[[self.CFG.ID_col, self.col1 + '_times_' + self.col2]]
+        if self.mode == 'devided':
+            df_tmp[self.col1 + '_devided_' + self.col2] = df[self.col1] / df[self.col2]
+            self.return_df = df_tmp[[self.CFG.ID_col, self.col1 + '_devided_' + self.col2]]
         return self
       
 # =======================
