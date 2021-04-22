@@ -311,7 +311,7 @@ class FreqBlock(BaseBlock):
 
     def transform(self, df):
         df[self.freq_col + '_freq'] = df[self.freq_col].map(self.meta_df)
-        self.return_df = df[[CFG.ID_col, self.freq_col + '_freq']]
+        self.return_df = df[[self.CFG.ID_col, self.freq_col + '_freq']]
         return self
 
 # ==============================
