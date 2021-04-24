@@ -6,6 +6,9 @@
 # module import
 # ====================
 import random
+import pandas as pd
+import numpy as np
+
 from collections import Counter, defaultdict
 
 from sklearn.model_selection import KFold
