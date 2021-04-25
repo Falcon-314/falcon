@@ -122,21 +122,19 @@ class AggBlock(BaseBlock):
         return self
 
 # =======================
-# Conmination categorical feature
+# Conmination categorical feature; Encodingを実施すること, 引数のデータフレームに特徴量の列が追加される
 # =======================
 class CombinationBlock(BaseBlock):
-    
-    def __init__(self,col1,col2):
+    def __init__(self,CFG,col1,col2):
+        self.CFG = CFG
         self.col1 = col1
         self.col2 = col2
 
-    def fit(self,input_df):
-        self.meta_df = input_df
+    def fit(self,df):
         return self
     
-    def transform(self,input_df):
-        remain_df = input_df.copy()
-        remain_df[self.col1 + 'and' + self.col2] = input_df[self.col1].astype('str') + input_df[self.col2].astype('str')
+    def transform(self,df):
+        df[self.col1 + 'and' + self.col2] = df[self.col1].astype('str') + df[self.col2].astype('str')
         return self
        
 #binning
