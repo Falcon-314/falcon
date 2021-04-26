@@ -28,7 +28,7 @@ class BaseBlock(object):
         return self.return_df
 
     def save(self, add_name):
-        filename = self.return_df.drop(self.CFG.ID_col,axis = 1).columns
+        filename = self.return_df.drop(self.CFG.ID_col,axis = 1).columns[0]
         self.return_df.to_csv(self.CFG.FEATURE_PATH + filename + add_name + '.csv',index=False)
         
 # =======================
