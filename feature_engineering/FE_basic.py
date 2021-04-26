@@ -351,9 +351,9 @@ class TargetBlock(BaseBlock):
 
         return self
 
-    def save(self, filename):
+    def save(self, add_name):
         for fold in range(self.CFG.n_fold):
             if fold in self.CFG.trn_fold:
-                self.return_df['fold_' + str(fold)].to_csv(self.CFG.FEATURE_PATH + filename + '_fold_' + str(fold) + '.csv',index=False)
+                self.return_df['fold_' + str(fold)].to_csv(self.CFG.FEATURE_PATH + self.feature + '_' + self.target + '_target' + '_fold_' + str(fold) + '_train.csv',index=False)
 
-        self.return_df['test'].to_csv(self.CFG.FEATURE_PATH + filename + '_test' + '.csv',index=False)
+        self.return_df['test'].to_csv(self.CFG.FEATURE_PATH + self.feature + '_' + self.target + '_target' + '_test.csv',index=False)
