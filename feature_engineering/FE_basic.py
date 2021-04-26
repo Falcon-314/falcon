@@ -102,23 +102,22 @@ class CountZeroBlock(BaseBlock):
 # Aggregation
 # =======================
 class AggBlock(BaseBlock):
-    def __init__(self,CFG,key:list,col,agg_setting,agg_name):
+    def __init__(self,CFG, cat, num, agg, name = None):
         self.CFG = CFG
-        self.key = key
-        self.col = col
-        self.agg_setting = agg_setting
-        self.agg_name = agg_name
-
-    def fit(self,df):
-        #集計の実行
-        use_cols = [self.CFG.ID_col, self.col] + self.key
-        columns_name = [self.CFG.ID_col] + ["_".join([self.col, self.agg_name] + self.key)] +self.key
-        self.meta_df = df[use_cols].groupby(self.key).agg(self.agg_setting).reset_index()
-        self.meta_df.columns = columns_name
+        self.cat = cat
+        self.num = num
+        self.agg = agg
+        if name == None:
+            self.name = agg
+        else:
+            self.name = name
+        
+    def fit(self, df):
+        self.meta_df = df[[self.cat,self.num]].rename(columns = {self.num:self.num + '_' + self.name + '_by_' +  self.cat}).groupby(self.cat).agg(self.agg)
         return self
-    
-    def transform(self,df):
-        self.return_df = pd.merge(df, self.meta_df, on = CFG.ID_col, how = 'left')
+
+    def transform(self, df):
+        self.return_df = pd.merge(df, self.meta_df, on = self.cat, how = 'left')[[self.CFG.ID_col, self.num + '_' + self.name + '_by_' +  self.cat]]
         return self
 
 # =======================
@@ -136,8 +135,10 @@ class CombinationBlock(BaseBlock):
     def transform(self,df):
         df[self.col1 + 'and' + self.col2] = df[self.col1].astype('str') + df[self.col2].astype('str')
         return self
-       
-#binning
+
+# ========================
+# binning
+# ========================
 class BinningBlock(BaseBlock):
     
     def __init__(self,col,edges):
@@ -200,35 +201,6 @@ class Flag_count_Block(BaseBlock):
 
 #freq1ratio : the number of most frequently appeared category / group size
 
-#---merge additional data---#
-class Agg_MergeBlock(BaseBlock):
-    def __init__(self,key:list,cols:list,agg_settings:list, add):
-        self.key = key
-        self.meta_df =None
-        self.columns_name = None
-        self.cols = cols
-        self.agg_settings =agg_settings
-        self.add = add
-
-    def fit(self,df):
-        #集計の実行
-        _add = self.add.groupby(self.key)[self.cols].agg(self.agg_settings).reset_index()
-
-        #列名の変更
-        _aggs = []
-        for agg in self.agg_settings:
-            if isinstance(agg, str):
-                _aggs.append(agg)
-            else:
-                _aggs.append(agg.__name__)
-        self.columns_name = self.key + ["_".join(self.key+[c,agg]) for c in self.cols for agg in _aggs]
-        _add.columns = self.columns_name
-        self.meta_df = _add
-        return self.transform(df)
-    
-    def transform(self,df):
-        df = df.merge(self.meta_df, on=self.key, how='left')
-        return df[self.columns_name].drop(self.key, axis = 1)
 
 #---time series feature---#
 class LagBlock(BaseBlock):
