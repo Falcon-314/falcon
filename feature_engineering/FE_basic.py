@@ -27,9 +27,10 @@ class BaseBlock(object):
     def view(self):
         return self.return_df
 
-    def save(self, filename):
-        self.return_df.to_csv(self.CFG.FEATURE_PATH + filename + '.csv',index=False)
-
+    def save(self, add_name):
+        filename = self.return_df.drop(self.CFG.ID_col,axis = 1).columns
+        self.return_df.to_csv(self.CFG.FEATURE_PATH + filename + add_name + '.csv',index=False)
+        
 # =======================
 # Basic Feature Engineering
 # =======================
