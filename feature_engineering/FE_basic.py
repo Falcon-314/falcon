@@ -120,6 +120,36 @@ class AggBlock(BaseBlock):
     def transform(self, df):
         self.return_df = pd.merge(df, self.meta_df, on = self.cat, how = 'left')[[self.CFG.ID_col, self.num + '_' + self.name + '_by_' +  self.cat]]
         return self
+ 
+# =======================
+# Aggregation + calculation
+# =======================
+class AggCalcBlock(BaseBlock):
+    def __init__(self,CFG, cat, num, agg, name = None):
+        self.CFG = CFG
+        self.cat = cat
+        self.num = num
+        self.agg = agg
+        if name == None:
+            self.name = agg
+        else:
+            self.name = name
+        
+    def fit(self, df):
+        self.meta_df = df[[self.cat,self.num]].rename(columns = {self.num:self.num + '_' + self.name + '_by_' +  self.cat}).groupby(self.cat).agg(self.agg)
+        return self
+
+    def transform(self, df, mode):
+        tmp_df =  pd.merge(df, self.meta_df, on = self.cat, how = 'left')
+        if mode == 'diff':
+            tmp_df[self.num + '_' + self.name + '_by_' +  self.cat + '_diff'] = tmp_df[self.num + '_' + self.name + '_by_' +  self.cat] - tmp_df[self.num]
+            self.return_df = tmp_df[[self.CFG.ID_col, self.num + '_' + self.name + '_by_' +  self.cat + '_diff']]
+        elif mode == 'ratio':
+            tmp_df[self.num + '_' + self.name + '_by_' +  self.cat + '_ratio'] = tmp_df[self.num + '_' + self.name + '_by_' +  self.cat] / tmp_df[self.num]
+            self.return_df = tmp_df[[self.CFG.ID_col, self.num + '_' + self.name + '_by_' +  self.cat + '_ratio']]
+        else:
+            print('error')
+        return self
 
 # =======================
 # Conmination categorical feature; Encodingを実施すること, 引数のデータフレームに特徴量の列が追加される
@@ -155,44 +185,7 @@ class BinningBlock(BaseBlock):
         remain_df[col + '_bin'] = pd.cut(input_df[self.col], edges, labels = False)
         return remain_df[col + '_bin']
    
-#---count feature---#
-#Flag
-class FlagBlock(BaseBlock):
-    
-    def __init__(self,key:str,cols):
-        self.key =key
-        self.meta_df =None
-        self.cols = cols
-        
-    def fit(self,input_df):
-        _df_max = input_df[self.cols].groupby(input_df[self.key]).max()
-        _df_min = input_df[self.cols].groupby(input_df[self.key]).min()
-        self.meta_df = _df
-        return self.transform(input_df)
-    
-    def transform(self,input_df):
-        out_df = pd.merge(input_df[self.key],self.meta_df,on=self.key,how='left').drop(columns=[self.key])
-        out_df = out_df.add_prefix('Range_')
-        return out_df  
-    
-#flag_cunt
-class Flag_count_Block(BaseBlock):
-    
-    def __init__(self,key:str,cols):
-        self.key =key
-        self.meta_df =None
-        self.cols = cols
-        
-    def fit(self,input_df):
-        _df_max = input_df[self.cols].groupby(input_df[self.key]).max()
-        _df_min = input_df[self.cols].groupby(input_df[self.key]).min()
-        self.meta_df = _df
-        return self.transform(input_df)
-    
-    def transform(self,input_df):
-        out_df = pd.merge(input_df[self.key],self.meta_df,on=self.key,how='left').drop(columns=[self.key])
-        out_df = out_df.add_prefix('Range_')
-        return out_df  
+
 
 #n_distinct : number of unique
 
