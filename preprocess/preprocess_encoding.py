@@ -22,7 +22,17 @@ def label_encoding(df,label_cols):
 # ===============================
 # One-Hot Encoding
 # ===============================
+from sklearn.preprocessing import OneHotEncoder
+def Onehot_encoding(df, one_cols):
+    ohe = OneHotEncoder(sparse = False,categories = 'auto')
+    ohe.fit(df[one_cols])
+    columns = []
+    for i,c in enumerate(one_cols):
+        columns += [f'{c}_{v}' for v in ohe.categories_[i]]
 
+    dummy_data = pd.DataFrame(ohe.transform(df[one_cols]),columns = columns)
+    df = pd.concat([df.drop(one_cols,axis = 1),dummy_data],axis = 1)
+    return df
 
 # ===============================
 # Hash Encoding
@@ -32,8 +42,9 @@ def label_encoding(df,label_cols):
 # Numerical Feature
 # ================================
 
-# auto-scaling
-
+# ================================
+# Auto Scaling
+# ================================
 from sklearn.preprocessing import StandardScaler
 def auto_scaling(df, auto_cols):
     #一時的にtrainとtestを分離
@@ -50,14 +61,18 @@ def auto_scaling(df, auto_cols):
     df = pd.concat([train_tmp,test_tmp],axis = 0).reset_index(drop = True)
     return df
 
-#min-max scaling
+# ================================
+# Min-Max Scaling
+# ================================
 from sklearn.preprocessing import MinMaxScaler
 def minmac_scaling(df, minmax_cols):
     scaler = MinMaxScaler()
     df[minmax_cols] = scaler.fit_transform(df[minmax_cols])
     return df
 
-#rank gauss:NNだとautoscalingより性能良いらしい
+# ================================
+# Rank gauss
+# ================================
 from sklearn.preprocessing import QuantileTransformer
 def rankgauss_scaling(df,Rankgauss_cols):
     #一時的にtrainとtestを分離
@@ -74,19 +89,25 @@ def rankgauss_scaling(df,Rankgauss_cols):
     df = pd.concat([train_tmp,test_tmp],axis = 0).reset_index(drop = True)
     return df
 
-#対数変換
+# ================================
+# Log transformation
+# ================================
 def log_transform(df, log_cols):
     for col in log_cols:
         df[col] = np.log1p(df[col])
     return df    
 
-#定数倍
+# ================================
+# Multiple
+# ================================
 def multiple_transform(df, multiple_cols, multiple):
     for col in multiple_cols:
         df[cols] = df[col].apply(lambda x: np.floor(x * multiple))
     return df
 
-#Clipping
+# ================================
+# Clipping
+# ================================
 def clipping(df,clip_cols,clip_min,clip_max):
     for col in clip_cols:
         df[cols] = df[col].clip(clip_min,clip_max)
