@@ -196,7 +196,9 @@ class BinningBlock(BaseBlock):
 #freq1ratio : the number of most frequently appeared category / group size
 
 
-#---time series feature---#
+# ========================
+# Lag Feature
+# ========================
 class LagBlock(BaseBlock):
     
     def __init__(self,lag:int,ids,cols):
@@ -210,7 +212,6 @@ class LagBlock(BaseBlock):
     def transform(self,input_df):
         output_df = input_df.groupby(self.ids)[self.cols].shift(self.lag)
         return output_df.add_prefix('Lag_{}_'.format(self.lag))
-    
     
 #Lag feature (diff)
 class DiffLagBlock(BaseBlock):
@@ -274,6 +275,19 @@ class SumLagBlock(BaseBlock):
     def transform(self,input_df):
         output_df = input_df.groupby(self.ids)[self.cols].rolling(window=self.window).sum().reset_index(drop=True)
         return output_df.add_prefix('SumLag_{}_'.format(self.window))
+
+# ========================
+# Dimension Reduction
+# ========================    
+ 
+    
+# ========================
+# Location Reduction
+# ========================  
+
+# ========================
+# Trend
+# ========================  
 
 # ==============================
 # Encoding
