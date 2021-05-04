@@ -1,3 +1,9 @@
+#pytorchの設定
+import torch
+from torch import nn
+import torch.optim as optim
+from torch.optim import Adam,AdamW,SGD
+
 def get_optimizer(CFG,model):
     if CFG.optimizer == 'Adam':
         optimizer = Adam(model.parameters(), lr=CFG.lr)
