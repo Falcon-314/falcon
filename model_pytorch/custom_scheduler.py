@@ -1,3 +1,9 @@
+#pytorchの設定
+import torch
+from torch import nn
+import torch.optim as optim
+from torch.optim.lr_scheduler import ReduceLROnPlateau, CosineAnnealingLR, CosineAnnealingWarmRestarts, CyclicLR, ExponentialLR, StepLR, MultiStepLR
+
 def get_scheduler(CFG,optimizer):
     if CFG.scheduler=='ReduceLROnPlateau':
         scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=CFG.factor, patience=CFG.patience, verbose=True, eps=CFG.eps)
