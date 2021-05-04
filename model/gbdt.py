@@ -21,46 +21,62 @@ class Base_Model(object):
     @abstractmethod
     def predict(self, model, features):
         raise NotImplementedError
-   
+
 from wandb.lightgbm import wandb_callback
 lgbm_callbacks=[wandb_callback()]
+
+class LgbmClass(Base_Model):
+    def __init__(self,model_params):
+        self.model_params = model_params
+        
+    def train(self, CFG, x_train, y_train, x_valid, y_valid):
+            
+            model = lgb.LGBMClassifier(**CFG.lgbm_params)
+            model.fit(x_train, y_train,
+                  eval_set=(x_valid, y_valid),
+                  eval_metric='logloss',
+                  verbose=100,
+                  early_stopping_rounds=500
+                  )
+            
+            return model
+
+    def valid(self, CFG, x_valid, model):
+            preds = model.predict_proba(x_valid)
+            return preds
+
+    def inference(self, CFG, x_test, model):
+            preds = model.predict_proba(x_test)
+            return preds
 
 class Lgbm(Base_Model):
     def __init__(self,model_params):
         self.model_params = model_params
-        self.model = None
-
-    def fit(self,x_train,y_train,x_valid,y_valid):
-        lgb_train = lgb.Dataset(x_train,y_train)
-        lgb_valid = lgb.Dataset(x_valid,y_valid)
-
-        model = lgb.train(self.model_params,
-            train_set=lgb_train,
-            valid_sets=[lgb_valid],
-            valid_names=['valid'],
-            early_stopping_rounds=100,
-            num_boost_round=10000,
-            verbose_eval=False,
-            callbacks=[wandb_callback()])
         
-        self.model = model
-
-    def predict(self,x_test):
-        return self.model.predict(x_test)
-    
-    def importance(self, features, fold):
-        fold_importance_df = pd.DataFrame()
-        fold_importance_df["Feature"] = features
-        fold_importance_df["importance"] = self.model.feature_importance()
-        fold_importance_df["fold"] = fold
-        return fold_importance_df
+    def train(self, CFG, x_train, y_train, x_valid, y_valid):
         
-    def train(self,x_train,y_train,x_valid,y_valid):
-        self.fit(x_train,y_train,x_valid,y_valid)
-        oof_df = self.predict(x_valid)
-        return oof_df, self.model       
-   
-   
+            lgb_train = lgb.Dataset(x_train,y_train)
+            lgb_valid = lgb.Dataset(x_valid,y_valid)
+            
+            model = lgb.train(self.model_params,
+                            train_set=lgb_train,
+                            valid_sets=[lgb_valid],
+                            valid_names=['valid'],
+                            early_stopping_rounds=100,
+                            num_boost_round=20000,
+                            verbose_eval=False,
+                            callbacks=[wandb_callback()])
+            
+            return model
+
+    def valid(self, CFG, x_valid, model):
+            preds = model.predict_proba(x_valid)
+            return preds
+
+    def inference(self, CFG, x_test, model):
+            preds = model.predict_proba(x_test)
+            return preds        
+      
 class Cat(Base_Model):
     def __init__(self,model_params, features_index):
         self.model_params = model_params
