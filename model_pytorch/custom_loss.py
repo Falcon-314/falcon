@@ -1,3 +1,7 @@
+#pytorchの設定
+import torch
+from torch import nn
+
 def get_criterion(CFG):
     if CFG.criterion == 'MSELoss':
         criterion =  nn.MSELoss()
