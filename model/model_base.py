@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import pickle
 
 def table_train(CFG, train, custommodel, dataset_preprocess_train, dataset_postprocess_train, get_result, MODEL_NAME, LOGGER):
     oof_df = pd.DataFrame()
