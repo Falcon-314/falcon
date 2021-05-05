@@ -152,7 +152,17 @@ class Xgb(Base_Model):
         return fold_importance_df
 
 
-def visualize(importance_df, size = (8,8)):
+def visualize_importance(CFG, features, MODEL_NAME, size):
+    importance_df = pd.DataFrame()
+    for fold in range(CFG.n_fold):
+        if fold in CFG.trn_fold:
+            model = pickle.load(open(CFG.MAIN_PATH + f'{MODEL_NAME}' + f'_fold_{fold}.sav','rb'))
+            fold_importance_df = pd.DataFrame()
+            fold_importance_df["Feature"] = features
+            fold_importance_df["importance"] = model.feature_importances_
+            fold_importance_df["fold"] = fold
+            importance_df = pd.concat([importance_df, fold_importance_df])
+
     cols = (importance_df[["Feature", "importance"]]
             .groupby("Feature")
             .mean()
@@ -163,7 +173,7 @@ def visualize(importance_df, size = (8,8)):
     plt.figure(figsize=size)
     sns.barplot(x="importance", y="Feature", data=best_features.sort_values(by="importance", ascending=False))
     plt.title('Features importance (averaged/folds)')
-    plt.tight_layout() 
+    plt.tight_layout()
 
     
 def get_gbdt(model_name, params):
