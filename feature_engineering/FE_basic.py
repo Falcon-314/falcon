@@ -279,7 +279,32 @@ class SumLagBlock(BaseBlock):
 # ========================
 # Dimension Reduction
 # ========================    
- 
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+class PcaBlock(BaseBlock):
+    def __init__(self,CFG, index, cols, values, pca_name, comp_ratio):
+        self.CFG = CFG
+        self.id = index
+        self.pivot = cols
+        self.cols = values
+        self.pca_name = pca_name
+        self.comp_ratio = comp_ratio
+        
+    def fit(self, df):
+        # pivot table
+        df_pivot = pd.pivot_table(df, index = self.id, columns = self.pivot, values = self.cols).add_prefix("pivot=")
+
+        # PCA
+        sc_df = StandardScaler().fit_transform(df_pivot.fillna(0))
+        pca = PCA(n_components=self.comp_ratio, random_state=37)
+        self.meta_df = pd.DataFrame(pca.fit_transform(sc_df), index=df_pivot.index).rename(columns=lambda x: f"{self.pca_name}_PCA={x:03}")
+        self.comp = pca.n_components_
+        return self
+
+    def transform(self, df):
+        features = [f'{self.pca_name}_PCA={c:03}' for c in range(self.comp)]
+        self.return_df = pd.merge(df[[self.CFG.ID_col] + self.id], self.meta_df, left_on=self.id, right_index=True, how="left")[[self.CFG.ID_col] + features]
+        return self 
     
 # ========================
 # Location Reduction
