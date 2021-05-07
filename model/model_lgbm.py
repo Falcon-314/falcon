@@ -59,7 +59,7 @@ class Lgbm(Base_Model):
                             valid_names=['valid'],
                             early_stopping_rounds=100,
                             num_boost_round=20000,
-                            verbose_eval=False,
+                            verbose_eval=100,
                             callbacks=[wandb_callback()])
             
             return model
@@ -72,7 +72,6 @@ class Lgbm(Base_Model):
             preds = model.predict(x_test)
             return preds        
       
-
 def visualize_importance(CFG, features, MODEL_NAME, size):
     importance_df = pd.DataFrame()
     for fold in range(CFG.n_fold):
