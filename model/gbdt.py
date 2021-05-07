@@ -70,11 +70,11 @@ class Lgbm(Base_Model):
             return model
 
     def valid(self, CFG, x_valid, model):
-            preds = model.predict_proba(x_valid)
+            preds = model.predict(x_valid)
             return preds
 
     def inference(self, CFG, x_test, model):
-            preds = model.predict_proba(x_test)
+            preds = model.predict(x_test)
             return preds        
       
 class Cat(Base_Model):
