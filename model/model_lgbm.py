@@ -73,7 +73,7 @@ def visualize_importance(CFG, features, MODEL_NAME, size):
             model = pickle.load(open(CFG.MAIN_PATH + f'{MODEL_NAME}' + f'_fold_{fold}.sav','rb'))
             fold_importance_df = pd.DataFrame()
             fold_importance_df["Feature"] = features
-            fold_importance_df["importance"] = model.feature_importances_
+            fold_importance_df["importance"] = model.feature_importance()
             fold_importance_df["fold"] = fold
             importance_df = pd.concat([importance_df, fold_importance_df])
 
