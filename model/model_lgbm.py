@@ -2,8 +2,6 @@ import pandas as pd
 import lightgbm as lgb
 import pickle
 
-import wandb
-
 import matplotlib.pyplot as plt
 import seaborn as sns
 
@@ -16,9 +14,6 @@ class Base_Model(object):
     @abstractmethod
     def predict(self, model, features):
         raise NotImplementedError
-
-from wandb.lightgbm import wandb_callback
-lgbm_callbacks=[wandb_callback()]
 
 class LgbmClass(Base_Model):
     def __init__(self,model_params):
@@ -59,8 +54,7 @@ class Lgbm(Base_Model):
                             valid_names=['valid'],
                             early_stopping_rounds=100,
                             num_boost_round=20000,
-                            verbose_eval=100,
-                            callbacks=[wandb_callback()])
+                            verbose_eval=100)
             
             return model
 
