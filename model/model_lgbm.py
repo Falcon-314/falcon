@@ -52,8 +52,8 @@ class Lgbm(Base_Model):
                             train_set=lgb_train,
                             valid_sets=[lgb_valid],
                             valid_names=['valid'],
-                            early_stopping_rounds=100,
-                            num_boost_round=20000,
+                            early_stopping_rounds=500,
+                            num_boost_round=50000,
                             verbose_eval=100)
             
             return model
