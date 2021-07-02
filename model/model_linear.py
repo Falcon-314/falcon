@@ -14,7 +14,7 @@ class LinearRidge(Base_Model):
     def __init__(self,model_params):
         self.model_params = model_params
         
-    def train(self, CFG, x_train, y_train):
+    def train(self, CFG, x_train, y_train, x_valid, y_valid):
         model =Ridge(self.model_params)
         model.fit(x_train,y_train)
         return model
@@ -32,7 +32,7 @@ class LinearLasso(Base_Model):
     def __init__(self,model_params):
         self.model_params = model_params
         
-    def train(self, CFG, x_train, y_train):
+    def train(self, CFG, x_train, y_train, x_valid, y_valid):
         model =Lasso(self.model_params)
         model.fit(x_train,y_train)
         return model
@@ -49,7 +49,7 @@ class BayesReg(Base_Model):
     def __init__(self,model_params):
         self.model_params = model_params
         
-    def train(self, CFG, x_train, y_train):
+    def train(self, CFG, x_train, y_train, x_valid, y_valid):
         model =BayesianRidge(self.model_params, compute_score=True)
         model.fit(x_train,y_train)
         return model
@@ -66,7 +66,7 @@ class LogReg(Base_Model):
     def __init__(self,model_params):
         self.model_params = model_params
         
-    def train(self, CFG, x_train, y_train):
+    def train(self, CFG, x_train, y_train, x_valid, y_valid):
         model =LogisticRegression(self.model_params)
         model.fit(x_train,y_train)
         return model
