@@ -15,35 +15,16 @@ class Base_Model(object):
     def predict(self, model, features):
         raise NotImplementedError
 
-class LgbmClass(Base_Model):
-    def __init__(self,model_params):
-        self.model_params = model_params
-        
-    def train(self, CFG, x_train, y_train, x_valid, y_valid):
-            
-            model = lgb.LGBMClassifier(**CFG.lgbm_params)
-            model.fit(x_train, y_train,
-                  eval_set=(x_valid, y_valid),
-                  eval_metric='logloss',
-                  verbose=100,
-                  early_stopping_rounds=500
-                  )
-            
-            return model
-
-    def valid(self, CFG, x_valid, model):
-            preds = model.predict_proba(x_valid)
-            return preds
-
-    def inference(self, CFG, x_test, model):
-            preds = model.predict_proba(x_test)
-            return preds
-
 class Lgbm(Base_Model):
     def __init__(self,model_params):
         self.model_params = model_params
         
     def train(self, CFG, x_train, y_train, x_valid, y_valid):
+            
+            if CFG.early_stopping_rounds = None:
+                CFG.early_stopping_rounds = 10000
+            if CFG.num_boost_round = None:
+                CFG.num_boost_round = 200
         
             lgb_train = lgb.Dataset(x_train,y_train)
             lgb_valid = lgb.Dataset(x_valid,y_valid)
@@ -52,8 +33,8 @@ class Lgbm(Base_Model):
                             train_set=lgb_train,
                             valid_sets=[lgb_valid],
                             valid_names=['valid'],
-                            early_stopping_rounds=500,
-                            num_boost_round=50000,
+                            early_stopping_rounds=CFG.early_stopping_rounds,
+                            num_boost_round=CFG.num_boost_round,
                             verbose_eval=100)
             
             return model
