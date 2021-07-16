@@ -21,9 +21,9 @@ class Lgbm(Base_Model):
         
     def train(self, CFG, x_train, y_train, x_valid, y_valid):
             
-            if CFG.early_stopping_rounds = None:
+            if CFG.early_stopping_rounds == None:
                 CFG.early_stopping_rounds = 10000
-            if CFG.num_boost_round = None:
+            if CFG.num_boost_round == None:
                 CFG.num_boost_round = 200
         
             lgb_train = lgb.Dataset(x_train,y_train)
