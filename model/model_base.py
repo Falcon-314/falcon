@@ -35,7 +35,6 @@ def table_train(CFG, train, custommodel, dataset_preprocess_train, dataset_postp
     # ====================================================  
     score = get_result(oof_df)
     LOGGER.info(f"========== CVresult:{score}==========")
-    oof_df.to_csv(CFG.MAIN_PATH+f'oof_df.csv', index=False)
     return oof_df
  
 def table_inference(CFG, test, custommodel, dataset_preprocess_test, dataset_postprocess_test, MODEL_NAME, LOGGER):
@@ -69,5 +68,4 @@ def table_inference(CFG, test, custommodel, dataset_preprocess_test, dataset_pos
     # Submission
     # ====================================================        
     submission = dataset_postprocess_test(CFG, predictions, test)
-    submission.to_csv(CFG.MAIN_PATH+f'submission.csv', index=False)
     return submission
